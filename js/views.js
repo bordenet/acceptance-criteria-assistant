@@ -228,9 +228,9 @@ function getNewProjectFormHTML() {
                         <div>
                             <label for="whatNeedsToBeDone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Task Description <span class="text-red-500">*</span></label>
                             <textarea id="whatNeedsToBeDone" name="whatNeedsToBeDone" rows="8" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="Describe the task in plain language. You can:
-• Paste rough notes or Slack context
+• Paste rough notes or Slack/Teams context
 • Describe what the feature should do
-• Paste existing draft AC to improve
+• Paste existing draft Acceptance Criteria to improve
 • Be as detailed or rough as you want"></textarea>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Works for "from scratch" or "improve existing" — just dump your context here.</p>
                         </div>
@@ -242,7 +242,7 @@ function getNewProjectFormHTML() {
                             🔗 Related Context <span class="text-gray-400 font-normal text-base">(optional)</span>
                         </h3>
                         <div>
-                            <textarea id="relatedContext" name="relatedContext" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="Links to PRD, Figma designs, Slack threads, related issues..."></textarea>
+                            <textarea id="relatedContext" name="relatedContext" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="Links to Product Requirements Document, Figma designs, Slack/Teams threads, Linear issues..."></textarea>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">URLs and references help the AI understand constraints.</p>
                         </div>
                     </section>
@@ -253,7 +253,7 @@ function getNewProjectFormHTML() {
                             Cancel
                         </button>
                         <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            Generate AC
+                            Generate Acceptance Criteria
                         </button>
                     </div>
                 </form>
@@ -356,7 +356,7 @@ function getEditProjectFormHTML(project) {
                             🔗 Related Context <span class="text-gray-400 font-normal text-base">(optional)</span>
                         </h3>
                         <div>
-                            <textarea id="relatedContext" name="relatedContext" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="Links to PRD, Figma designs, Slack threads...">${escapeHtml(project.relatedContext || '')}</textarea>
+                            <textarea id="relatedContext" name="relatedContext" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="Links to Product Requirements Document, Figma designs, Slack/Teams threads, Linear issues...">${escapeHtml(project.relatedContext || '')}</textarea>
                         </div>
                     </section>
 
