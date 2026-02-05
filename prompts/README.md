@@ -1,4 +1,4 @@
-# Hello-World Prompt Templates
+# Acceptance Criteria Assistant Prompt Templates
 
 These are **boilerplate prompts with built-in AI slop detection** that provide a high-quality starting point for new genesis-derived projects.
 
@@ -55,7 +55,7 @@ Each document type may need additional rules:
 ```bash
 # Copy prompts to your new project
 mkdir -p prompts
-cp genesis/examples/hello-world/prompts/*.md prompts/
+cp genesis/examples/acceptance-criteria-assistant/prompts/*.md prompts/
 
 # Customize for your document type
 sed -i '' 's/acceptance criteria/PRD/g' prompts/*.md

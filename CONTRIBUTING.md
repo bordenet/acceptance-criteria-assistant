@@ -1,11 +1,11 @@
-# Contributing to Hello World Genesis Example
+# Contributing to Acceptance Criteria Assistant
 
 Thank you for your interest in contributing!
 
 ## Development Setup
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/<your-username>/hello-world.git`
+2. Clone your fork: `git clone https://github.com/<your-username>/acceptance-criteria-assistant.git`
 3. Install dependencies: `npm install`
 4. Pre-commit hooks are automatically installed via npm install
 
