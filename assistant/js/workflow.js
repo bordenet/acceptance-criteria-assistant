@@ -234,7 +234,7 @@ export class Workflow {
      */
   exportAsMarkdown() {
     // CUSTOMIZE: Update attribution URL for your deployed app
-    const attribution = '\n\n---\n\n*Generated with [Document Assistant](https://your-app-url.github.io/your-app/)*';
+    const attribution = '\n\n---\n\n*Generated with [Acceptance Criteria Assistant](https://bordenet.github.io/acceptance-criteria-assistant/)*';
 
     // CUSTOMIZE: Update document header format
     let md = `# ${this.project.title}\n\n`;
