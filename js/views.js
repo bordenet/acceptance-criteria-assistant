@@ -216,7 +216,7 @@ function getNewProjectFormHTML() {
                         <div>
                             <label for="issueTitle" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Issue Title <span class="text-gray-400">(optional)</span></label>
                             <input type="text" id="issueTitle" name="issueTitle" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="e.g., Add bulk delete to admin panel">
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Clear, direct task name. You may already have this in Linear.</p>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Clear, direct task name. You may already have this in Linear/Jira/Monday/etc.</p>
                         </div>
                     </section>
 
