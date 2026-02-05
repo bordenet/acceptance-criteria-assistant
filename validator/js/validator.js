@@ -1,14 +1,11 @@
 /**
- * {{DOCUMENT_TYPE}} Validator - Scoring Logic
+ * Acceptance Criteria Validator - Scoring Logic
  *
- * TEMPLATE: This is a genesis template. Replace {{DOCUMENT_TYPE}}, {{DIMENSION_X_NAME}}, etc.
- * with your document type specifics before deploying.
- *
- * Scoring Dimensions (customize for your document type):
- * 1. {{DIMENSION_1_NAME}} ({{DIMENSION_1_POINTS}} pts) - {{DIMENSION_1_DESCRIPTION}}
- * 2. {{DIMENSION_2_NAME}} ({{DIMENSION_2_POINTS}} pts) - {{DIMENSION_2_DESCRIPTION}}
- * 3. {{DIMENSION_3_NAME}} ({{DIMENSION_3_POINTS}} pts) - {{DIMENSION_3_DESCRIPTION}}
- * 4. {{DIMENSION_4_NAME}} ({{DIMENSION_4_POINTS}} pts) - {{DIMENSION_4_DESCRIPTION}}
+ * Scoring Dimensions:
+ * 1. Structure (25 pts) - Document organization and formatting
+ * 2. Clarity (30 pts) - Precision, measurability, actionable language
+ * 3. Business Value (25 pts) - ROI, stakeholder value, success criteria
+ * 4. Completeness (20 pts) - Length, next steps, risk mitigation
  */
 
 // ============================================================================
@@ -176,7 +173,7 @@ export function detectSections(text) {
 // ============================================================================
 
 /**
- * Score dimension 1 ({{DIMENSION_1_POINTS}} pts max)
+ * Score Structure (25 pts max)
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
@@ -184,7 +181,7 @@ export function scoreDimension1(text) {
   const issues = [];
   const strengths = [];
   let score = 0;
-  const maxScore = 30; // {{DIMENSION_1_POINTS}}
+  const maxScore = 25;
 
   const detection = detectDimension1(text);
 
@@ -209,7 +206,7 @@ export function scoreDimension1(text) {
 }
 
 /**
- * Score dimension 2 ({{DIMENSION_2_POINTS}} pts max)
+ * Score Clarity (30 pts max)
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
@@ -217,7 +214,7 @@ export function scoreDimension2(text) {
   const issues = [];
   const strengths = [];
   let score = 0;
-  const maxScore = 25; // {{DIMENSION_2_POINTS}}
+  const maxScore = 30;
 
   const detection = detectDimension2(text);
 
@@ -242,7 +239,7 @@ export function scoreDimension2(text) {
 }
 
 /**
- * Score dimension 3 ({{DIMENSION_3_POINTS}} pts max)
+ * Score Business Value (25 pts max)
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
@@ -250,7 +247,7 @@ export function scoreDimension3(text) {
   const issues = [];
   const strengths = [];
   let score = 0;
-  const maxScore = 25; // {{DIMENSION_3_POINTS}}
+  const maxScore = 25;
 
   const detection = detectDimension3(text);
 
@@ -275,7 +272,7 @@ export function scoreDimension3(text) {
 }
 
 /**
- * Score dimension 4 ({{DIMENSION_4_POINTS}} pts max)
+ * Score Completeness (20 pts max)
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
@@ -283,7 +280,7 @@ export function scoreDimension4(text) {
   const issues = [];
   const strengths = [];
   let score = 0;
-  const maxScore = 20; // {{DIMENSION_4_POINTS}}
+  const maxScore = 20;
 
   const detection = detectDimension4(text);
   const sections = detectSections(text);

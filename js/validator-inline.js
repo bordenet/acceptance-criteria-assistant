@@ -164,11 +164,11 @@ function scoreCompleteness(text) {
 }
 
 /**
- * Validate a proposal and return comprehensive scoring results
- * @param {string} text - Proposal content
+ * Validate a document and return comprehensive scoring results
+ * @param {string} text - Document content
  * @returns {Object} Complete validation results
  */
-export function validateProposal(text) {
+export function validateDocument(text) {
   if (!text || typeof text !== 'string' || text.trim().length < 50) {
     return {
       totalScore: 0,

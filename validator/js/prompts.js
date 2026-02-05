@@ -1,8 +1,5 @@
 /**
- * Prompt generation for LLM-based {{DOCUMENT_TYPE}} scoring
- *
- * TEMPLATE: Replace {{DOCUMENT_TYPE}}, {{DIMENSION_1_NAME}}, etc. with your document type specifics.
- * Example: "One-Pager" -> "Job Description", "Problem Clarity" -> "Inclusive Language"
+ * Prompt generation for LLM-based Acceptance Criteria scoring
  */
 
 /**
@@ -11,23 +8,31 @@
  * @returns {string} Complete prompt for LLM scoring
  */
 export function generateLLMScoringPrompt(documentContent) {
-  return `You are an expert evaluating a {{DOCUMENT_TYPE}} document.
+  return `You are an expert evaluating an Acceptance Criteria document.
 
-Score this {{DOCUMENT_TYPE}} using the following rubric (0-100 points total):
+Score this Acceptance Criteria using the following rubric (0-100 points total):
 
 ## SCORING RUBRIC
 
-### 1. {{DIMENSION_1_NAME}} ({{DIMENSION_1_POINTS}} points)
-{{DIMENSION_1_CRITERIA}}
+### 1. Structure (25 points)
+- Document organization and formatting
+- Clear heading hierarchy
+- Proper use of bullets and tables
 
-### 2. {{DIMENSION_2_NAME}} ({{DIMENSION_2_POINTS}} points)
-{{DIMENSION_2_CRITERIA}}
+### 2. Clarity (30 points)
+- Precision and avoidance of vague qualifiers
+- Measurability with specific metrics
+- Actionable language with clear verbs
 
-### 3. {{DIMENSION_3_NAME}} ({{DIMENSION_3_POINTS}} points)
-{{DIMENSION_3_CRITERIA}}
+### 3. Business Value (25 points)
+- ROI and cost-benefit analysis
+- Stakeholder value articulation
+- Success criteria definition
 
-### 4. {{DIMENSION_4_NAME}} ({{DIMENSION_4_POINTS}} points)
-{{DIMENSION_4_CRITERIA}}
+### 4. Completeness (20 points)
+- Adequate length and depth
+- Next steps and action items
+- Risk identification and mitigation
 
 ## CALIBRATION GUIDANCE
 - Be HARSH. Most documents score 40-60. Only exceptional ones score 80+.
@@ -47,16 +52,16 @@ Provide your evaluation in this exact format:
 
 **TOTAL SCORE: [X]/100**
 
-### {{DIMENSION_1_NAME}}: [X]/{{DIMENSION_1_POINTS}}
+### Structure: [X]/25
 [2-3 sentence justification]
 
-### {{DIMENSION_2_NAME}}: [X]/{{DIMENSION_2_POINTS}}
+### Clarity: [X]/30
 [2-3 sentence justification]
 
-### {{DIMENSION_3_NAME}}: [X]/{{DIMENSION_3_POINTS}}
+### Business Value: [X]/25
 [2-3 sentence justification]
 
-### {{DIMENSION_4_NAME}}: [X]/{{DIMENSION_4_POINTS}}
+### Completeness: [X]/20
 [2-3 sentence justification]
 
 ### Top 3 Issues
@@ -84,14 +89,14 @@ export function generateCritiquePrompt(documentContent, currentResult) {
     ...(currentResult.dimension4?.issues || [])
   ].slice(0, 5).map(i => `- ${i}`).join('\n');
 
-  return `You are an expert providing detailed feedback on a {{DOCUMENT_TYPE}}.
+  return `You are an expert providing detailed feedback on Acceptance Criteria.
 
 ## CURRENT VALIDATION RESULTS
 Total Score: ${currentResult.totalScore}/100
-- {{DIMENSION_1_NAME}}: ${currentResult.dimension1?.score || 0}/{{DIMENSION_1_POINTS}}
-- {{DIMENSION_2_NAME}}: ${currentResult.dimension2?.score || 0}/{{DIMENSION_2_POINTS}}
-- {{DIMENSION_3_NAME}}: ${currentResult.dimension3?.score || 0}/{{DIMENSION_3_POINTS}}
-- {{DIMENSION_4_NAME}}: ${currentResult.dimension4?.score || 0}/{{DIMENSION_4_POINTS}}
+- Structure: ${currentResult.dimension1?.score || 0}/25
+- Clarity: ${currentResult.dimension2?.score || 0}/30
+- Business Value: ${currentResult.dimension3?.score || 0}/25
+- Completeness: ${currentResult.dimension4?.score || 0}/20
 
 Key issues detected:
 ${issuesList || '- None detected by automated scan'}
@@ -122,7 +127,7 @@ Be specific. Show exact rewrites. Make it ready for stakeholder review.`;
  * @returns {string} Complete prompt for rewrite
  */
 export function generateRewritePrompt(documentContent, currentResult) {
-  return `You are an expert rewriting a {{DOCUMENT_TYPE}} to achieve a score of 85+.
+  return `You are an expert rewriting Acceptance Criteria to achieve a score of 85+.
 
 ## CURRENT SCORE: ${currentResult.totalScore}/100
 
@@ -134,7 +139,7 @@ ${documentContent}
 
 ## REWRITE REQUIREMENTS
 
-Create a complete, polished {{DOCUMENT_TYPE}} that:
+Create complete, polished Acceptance Criteria that:
 1. Scores 85+ across all dimensions
 2. Has all required sections clearly organized
 3. Uses clear, specific language

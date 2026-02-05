@@ -1,12 +1,12 @@
 /**
  * Tests for validator-inline.js
  */
-import { validateProposal, getScoreColor, getScoreLabel } from '../js/validator-inline.js';
+import { validateDocument, getScoreColor, getScoreLabel } from '../js/validator-inline.js';
 
-describe('Inline Proposal Validator', () => {
-  describe('validateProposal', () => {
+describe('Inline Document Validator', () => {
+  describe('validateDocument', () => {
     test('should return zero scores for empty content', () => {
-      const result = validateProposal('');
+      const result = validateDocument('');
       expect(result.totalScore).toBe(0);
       expect(result.structure.score).toBe(0);
       expect(result.clarity.score).toBe(0);
@@ -15,12 +15,12 @@ describe('Inline Proposal Validator', () => {
     });
 
     test('should return zero scores for short content', () => {
-      const result = validateProposal('Too short');
+      const result = validateDocument('Too short');
       expect(result.totalScore).toBe(0);
     });
 
     test('should return zero scores for null', () => {
-      const result = validateProposal(null);
+      const result = validateDocument(null);
       expect(result.totalScore).toBe(0);
     });
 
@@ -53,7 +53,7 @@ We will build a self-service portal that reduces support costs by $50,000 annual
 - Risk: Integration complexity. Mitigation: Early prototype testing.
 - Assumption: API availability
       `;
-      const result = validateProposal(goodProposal);
+      const result = validateDocument(goodProposal);
       expect(result.totalScore).toBeGreaterThan(50);
       expect(result.structure.score).toBeGreaterThan(10);
       expect(result.clarity.score).toBeGreaterThan(10);
@@ -67,7 +67,7 @@ It will provide good performance and high quality results in a reasonable timefr
 The scalable and efficient approach will be minimal effort with appropriate resources.
       `.repeat(3); // Make it long enough to pass minimum length
 
-      const result = validateProposal(vagueProposal);
+      const result = validateDocument(vagueProposal);
       expect(result.clarity.issues.some(i => i.includes('vague'))).toBe(true);
     });
 
@@ -84,7 +84,7 @@ Current system has 500ms latency and costs $200,000 annually.
 ## Solution  
 Implement new architecture to reduce latency to 100ms.
       `;
-      const result = validateProposal(measurableProposal);
+      const result = validateDocument(measurableProposal);
       expect(result.clarity.score).toBeGreaterThan(5);
     });
   });

@@ -71,6 +71,99 @@ describe('Smoke Test - App Initialization', () => {
     });
   });
 
+  /**
+   * CRITICAL: Export Consistency Tests
+   *
+   * These tests verify that all exports imported by project-view.js actually exist.
+   * This catches the exact bug that broke PR-FAQ, One-Pager, and PRD on 2026-02-05:
+   * - project-view.js imported confirmWithRemember from ui.js
+   * - But ui.js didn't export confirmWithRemember (uncommitted changes)
+   * - Result: SyntaxError in browser, app completely broken
+   *
+   * If you add a new import to project-view.js, add a corresponding test here!
+   */
+  describe('Export Consistency - ui.js exports match project-view.js imports', () => {
+    test('ui.js exports escapeHtml', async () => {
+      const ui = await import('../js/ui.js');
+      expect(typeof ui.escapeHtml).toBe('function');
+    });
+
+    test('ui.js exports showToast', async () => {
+      const ui = await import('../js/ui.js');
+      expect(typeof ui.showToast).toBe('function');
+    });
+
+    test('ui.js exports copyToClipboard', async () => {
+      const ui = await import('../js/ui.js');
+      expect(typeof ui.copyToClipboard).toBe('function');
+    });
+
+    test('ui.js exports copyToClipboardAsync', async () => {
+      const ui = await import('../js/ui.js');
+      expect(typeof ui.copyToClipboardAsync).toBe('function');
+    });
+
+    test('ui.js exports showPromptModal', async () => {
+      const ui = await import('../js/ui.js');
+      expect(typeof ui.showPromptModal).toBe('function');
+    });
+
+    test('ui.js exports confirm', async () => {
+      const ui = await import('../js/ui.js');
+      expect(typeof ui.confirm).toBe('function');
+    });
+
+    test('ui.js exports confirmWithRemember', async () => {
+      const ui = await import('../js/ui.js');
+      expect(typeof ui.confirmWithRemember).toBe('function');
+    });
+
+    test('ui.js exports showDocumentPreviewModal', async () => {
+      const ui = await import('../js/ui.js');
+      expect(typeof ui.showDocumentPreviewModal).toBe('function');
+    });
+
+    test('ui.js exports createActionMenu', async () => {
+      const ui = await import('../js/ui.js');
+      expect(typeof ui.createActionMenu).toBe('function');
+    });
+  });
+
+  describe('Export Consistency - validator-inline.js exports match project-view.js imports', () => {
+    // All projects must use validateDocument (generic name for shared library)
+    test('validator-inline.js exports validateDocument', async () => {
+      const validator = await import('../js/validator-inline.js');
+      expect(typeof validator.validateDocument).toBe('function');
+    });
+
+    test('validator-inline.js exports getScoreColor', async () => {
+      const validator = await import('../js/validator-inline.js');
+      expect(typeof validator.getScoreColor).toBe('function');
+    });
+
+    test('validator-inline.js exports getScoreLabel', async () => {
+      const validator = await import('../js/validator-inline.js');
+      expect(typeof validator.getScoreLabel).toBe('function');
+    });
+  });
+
+  describe('Export Consistency - diff-view.js exports match project-view.js imports', () => {
+    test('diff-view.js exports computeWordDiff', async () => {
+      const diffView = await import('../js/diff-view.js');
+      expect(typeof diffView.computeWordDiff).toBe('function');
+    });
+
+    test('diff-view.js exports renderDiffHtml', async () => {
+      const diffView = await import('../js/diff-view.js');
+      expect(typeof diffView.renderDiffHtml).toBe('function');
+    });
+
+    test('diff-view.js exports getDiffStats', async () => {
+      const diffView = await import('../js/diff-view.js');
+      expect(typeof diffView.getDiffStats).toBe('function');
+    });
+  });
+
   describe('Required DOM Elements', () => {
     test('app-container exists', () => {
       expect(document.getElementById('app-container')).not.toBeNull();
