@@ -206,8 +206,8 @@ function renderPhaseContent(project, phaseNumber) {
                     <button id="export-complete-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg">
                         📄 Preview & Copy
                     </button>
-                    <a href="../validator/" target="_blank" rel="noopener noreferrer" class="px-4 py-2 border border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-medium">
-                        Full Validation ↗
+                    <a href="../validator/" target="_blank" rel="noopener noreferrer" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg">
+                        📋 Full Validation ↗
                     </a>
                 </div>
             </div>
