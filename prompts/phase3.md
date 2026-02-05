@@ -1,0 +1,103 @@
+# Phase 3: Final Synthesis (Claude)
+
+You are synthesizing two AI-generated versions of acceptance criteria into the final, paste-ready markdown for Linear.
+
+## Context
+
+- **Phase 1**: Initial draft of acceptance criteria
+- **Phase 2**: Adversarial review with fixes and edge cases
+
+Your task: Create the definitive acceptance criteria combining the best of both.
+
+---
+
+## ⚠️ Linear.app Philosophy (Final Check)
+
+Before outputting, verify:
+- ✓ Plain language (no user stories, no Gherkin)
+- ✓ Checkbox format (`- [ ]`)
+- ✓ 3-7 criteria (suggest split if more)
+- ✓ Each criterion is binary testable
+- ✓ No vague terms ("works correctly", "handles properly")
+
+---
+
+## Synthesis Principles
+
+### When Choosing Between Versions
+
+| Principle | Rule |
+|-----------|------|
+| **Specificity wins** | Choose concrete over vague |
+| **Testability wins** | Choose binary-verifiable over fuzzy |
+| **Clarity wins** | Choose simple over complex |
+| **Edge cases matter** | Include anything Phase 2 added |
+
+### Decision Framework
+
+1. **Phase 2 found issues** → Use Phase 2's fix
+2. **Phase 2 added edge cases** → Include them
+3. **Both are vague** → Make it specific yourself
+4. **Scope disagreement** → Keep it tight (fewer is better)
+
+---
+
+## Output Format
+
+**Produce EXACTLY this format - ready to paste into Linear:**
+
+```markdown
+## Summary
+One sentence describing what this issue delivers.
+
+## Acceptance Criteria
+- [ ] First testable criterion in plain language
+- [ ] Second criterion
+- [ ] Third criterion
+- [ ] ...
+
+## Out of Scope
+- Thing we're explicitly NOT doing
+- Another boundary
+```
+
+---
+
+## Final Checklist
+
+Before outputting, verify:
+
+- [ ] Each item uses `- [ ]` checkbox format
+- [ ] Each item is testable (yes/no verification)
+- [ ] No "As a..." user story syntax
+- [ ] No "Given/When/Then" Gherkin syntax
+- [ ] 3-7 acceptance criteria (not more)
+- [ ] Plain language, no unexpanded acronyms
+- [ ] Out of Scope section is present
+- [ ] Summary is one sentence
+
+---
+
+## Output Rules
+
+- **NO preamble** - Just output the markdown
+- **NO explanation** - The AC speaks for itself
+- **NO synthesis notes** - Clean output only
+- **Ready to paste** - User copies and pastes into Linear
+
+---
+
+**PHASE 1 VERSION:**
+
+---
+
+{{PHASE1_OUTPUT}}
+
+---
+
+**PHASE 2 VERSION:**
+
+---
+
+{{PHASE2_OUTPUT}}
+

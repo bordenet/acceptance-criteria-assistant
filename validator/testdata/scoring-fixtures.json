@@ -1,0 +1,23 @@
+{
+  "fixtures": [
+    {
+      "name": "minimal_document",
+      "input": "Hello world",
+      "expectedScoreRange": [0, 30],
+      "description": "Very short document should score low"
+    },
+    {
+      "name": "document_with_headings",
+      "input": "# Title\n\nThis is a document with a heading.\n\nIt has multiple paragraphs.\n\nAnd good structure.",
+      "expectedScoreRange": [40, 70],
+      "description": "Document with headings and paragraphs"
+    },
+    {
+      "name": "comprehensive_document",
+      "input": "# Main Title\n\nThis is an introduction paragraph that sets up the document.\n\n## Section One\n\nHere are some key points:\n- First point\n- Second point\n- Third point\n\n## Section Two\n\nHere is some `code` example:\n\n```javascript\nconsole.log('test');\n```\n\nAnd here is another paragraph with more content to increase the word count and improve the score.",
+      "expectedScoreRange": [70, 100],
+      "description": "Comprehensive document with all features"
+    }
+  ]
+}
+
