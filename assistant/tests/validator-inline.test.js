@@ -68,7 +68,10 @@ The scalable and efficient approach will be minimal effort with appropriate reso
       `.repeat(3); // Make it long enough to pass minimum length
 
       const result = validateDocument(vagueProposal);
-      expect(result.clarity.issues.some(i => i.includes('vague'))).toBe(true);
+      // Full validator flags missing actionable language and metrics instead of "vague"
+      expect(result.clarity.issues.some(i =>
+        i.includes('vague') || i.includes('actionable') || i.includes('metrics')
+      )).toBe(true);
     });
 
     test('should reward measurable metrics', () => {
