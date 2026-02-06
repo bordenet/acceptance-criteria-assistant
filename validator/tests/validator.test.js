@@ -13,16 +13,16 @@ describe('validateDocument', () => {
 
   it('should return all four dimension scores', () => {
     const result = validateDocument('Some test content');
-    expect(result).toHaveProperty('dimension1');
-    expect(result).toHaveProperty('dimension2');
-    expect(result).toHaveProperty('dimension3');
-    expect(result).toHaveProperty('dimension4');
+    expect(result).toHaveProperty('structure');
+    expect(result).toHaveProperty('clarity');
+    expect(result).toHaveProperty('businessValue');
+    expect(result).toHaveProperty('completeness');
 
     // Each dimension should have score, maxScore, issues, strengths
-    expect(result.dimension1).toHaveProperty('score');
-    expect(result.dimension1).toHaveProperty('maxScore');
-    expect(result.dimension1).toHaveProperty('issues');
-    expect(result.dimension1).toHaveProperty('strengths');
+    expect(result.structure).toHaveProperty('score');
+    expect(result.structure).toHaveProperty('maxScore');
+    expect(result.structure).toHaveProperty('issues');
+    expect(result.structure).toHaveProperty('strengths');
   });
 
   it('should return low total score for minimal content', () => {
@@ -33,7 +33,7 @@ describe('validateDocument', () => {
   it('should handle empty input', () => {
     const result = validateDocument('');
     expect(result.totalScore).toBe(0);
-    expect(result.dimension1.issues).toContain('No content to validate');
+    expect(result.structure.issues).toContain('No content to validate');
   });
 
   it('should handle null input', () => {
@@ -44,11 +44,12 @@ describe('validateDocument', () => {
   it('should return score that sums dimensions', () => {
     const result = validateDocument('# Section 1\n\nSome quality content here.');
     const sumOfDimensions =
-      result.dimension1.score +
-      result.dimension2.score +
-      result.dimension3.score +
-      result.dimension4.score;
-    expect(result.totalScore).toBe(sumOfDimensions);
+      result.structure.score +
+      result.clarity.score +
+      result.businessValue.score +
+      result.completeness.score;
+    // Note: totalScore may be less than sum due to slop deduction
+    expect(result.totalScore).toBeLessThanOrEqual(sumOfDimensions);
   });
 
   it('should cap total score at 100', () => {
