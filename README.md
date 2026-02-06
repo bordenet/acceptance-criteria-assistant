@@ -1,10 +1,12 @@
 # Acceptance Criteria Assistant
 
-AI-powered acceptance criteria generator for Linear.app issues using adversarial workflow
+Write acceptance criteria with AI. Three phases: draft, review, refine.
 
 [![Star this repo](https://img.shields.io/github/stars/bordenet/acceptance-criteria-assistant?style=social)](https://github.com/bordenet/acceptance-criteria-assistant)
 
 **Try it**: [Assistant](https://bordenet.github.io/acceptance-criteria-assistant/) · [Validator](https://bordenet.github.io/acceptance-criteria-assistant/validator/)
+
+> **What is Acceptance Criteria?** Acceptance criteria are specific, testable conditions that a feature must satisfy before being accepted. They define the boundaries of a user story, clarify requirements, and provide pass/fail checkpoints for QA. Good AC follows the "Given-When-Then" format and eliminates ambiguity.
 
 [![CI](https://github.com/bordenet/acceptance-criteria-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/bordenet/acceptance-criteria-assistant/actions)
 [![codecov](https://codecov.io/gh/bordenet/acceptance-criteria-assistant/branch/main/graph/badge.svg)](https://codecov.io/gh/bordenet/acceptance-criteria-assistant)
@@ -14,7 +16,7 @@ AI-powered acceptance criteria generator for Linear.app issues using adversarial
 ## Quick Start
 
 1. Open the [demo](https://bordenet.github.io/acceptance-criteria-assistant/)
-2. Enter your inputs
+2. Enter user story, context, and edge cases
 3. Copy prompt → paste into Claude → paste response back
 4. Repeat for review (Gemini) and synthesis (Claude)
 5. Export as Markdown
@@ -100,6 +102,10 @@ acceptance-criteria-assistant/
 
 Built with [Genesis](https://github.com/bordenet/genesis). Related tools:
 
+- [Acceptance Criteria Assistant](https://github.com/bordenet/acceptance-criteria-assistant)
+- [Architecture Decision Record](https://github.com/bordenet/architecture-decision-record)
+- [Business Justification Assistant](https://github.com/bordenet/business-justification-assistant)
+- [JD Assistant](https://github.com/bordenet/jd-assistant)
 - [One-Pager](https://github.com/bordenet/one-pager)
 - [Power Statement Assistant](https://github.com/bordenet/power-statement-assistant)
 - [PR/FAQ Assistant](https://github.com/bordenet/pr-faq-assistant)
@@ -113,4 +119,3 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ## License
 
 MIT - See [LICENSE](LICENSE)
-
