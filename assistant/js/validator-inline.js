@@ -353,8 +353,17 @@ export function validateDocument(text) {
     }
   }
 
+  // Include slop deduction in completeness category so categories sum to total
+  const adjustedCompleteness = {
+    ...completeness,
+    score: Math.max(0, completeness.score - slopDeduction),
+    issues: slopDeduction > 0
+      ? [...completeness.issues, `AI patterns detected (-${slopDeduction})`]
+      : completeness.issues
+  };
+
   const totalScore = Math.max(0,
-    structure.score + clarity.score + businessValue.score + completeness.score - slopDeduction
+    structure.score + clarity.score + businessValue.score + adjustedCompleteness.score
   );
 
   return {
@@ -362,7 +371,7 @@ export function validateDocument(text) {
     structure,
     clarity,
     businessValue,
-    completeness,
+    completeness: adjustedCompleteness,
     slopDetection: {
       ...slopPenalty,
       deduction: slopDeduction,
