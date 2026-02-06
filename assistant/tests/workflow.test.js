@@ -10,7 +10,7 @@
  */
 
 import { jest } from '@jest/globals';
-import { Workflow, WORKFLOW_CONFIG, getPhaseMetadata, exportFinalDocument, getExportFilename } from '../js/workflow.js';
+import { Workflow, WORKFLOW_CONFIG, getPhaseMetadata, exportFinalDocument, getExportFilename, getFinalMarkdown, loadDefaultPrompts } from '../js/workflow.js';
 
 // Mock fetch for prompt template loading
 beforeAll(() => {
@@ -346,3 +346,138 @@ describe('getExportFilename helper', () => {
   });
 });
 
+describe('getFinalMarkdown helper', () => {
+  it('should return null when no phase output', () => {
+    const project = {
+      title: 'Test',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const result = getFinalMarkdown(project);
+    expect(result).toBeNull();
+  });
+
+  it('should return markdown when phase output exists', () => {
+    const project = {
+      title: 'Test',
+      issueTitle: 'Test Issue',
+      phase3_output: 'Final content',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const result = getFinalMarkdown(project);
+    expect(result).toContain('Final content');
+  });
+
+  it('should return markdown from phase 1 when phase 3 not available', () => {
+    const project = {
+      title: 'Test',
+      issueTitle: 'Test Issue',
+      phase1_output: 'Phase 1 content',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const result = getFinalMarkdown(project);
+    expect(result).not.toBeNull();
+  });
+});
+
+describe('Workflow getLastCompletedPhase', () => {
+  it('should return null when no phases completed', () => {
+    const project = {
+      title: 'Test',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const workflow = new Workflow(project);
+    const result = workflow.getLastCompletedPhase();
+    expect(result).toBeNull();
+  });
+
+  it('should return last completed phase', () => {
+    const project = {
+      title: 'Test',
+      phase1_output: 'Phase 1',
+      phase2_output: 'Phase 2',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const workflow = new Workflow(project);
+    const result = workflow.getLastCompletedPhase();
+    expect(result).toEqual({ phase: 2, response: 'Phase 2' });
+  });
+
+  it('should return phase 3 when all phases completed', () => {
+    const project = {
+      title: 'Test',
+      phase1_output: 'Phase 1',
+      phase2_output: 'Phase 2',
+      phase3_output: 'Phase 3',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const workflow = new Workflow(project);
+    const result = workflow.getLastCompletedPhase();
+    expect(result).toEqual({ phase: 3, response: 'Phase 3' });
+  });
+});
+
+// =================================================================
+// Workflow legacy phase format support Tests
+// =================================================================
+describe('Workflow legacy phase format support', () => {
+  test('should handle nested array format phases', () => {
+    const project = {
+      phases: [
+        { response: 'Phase 1 nested array' },
+        { response: 'Phase 2 nested array' }
+      ],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const workflow = new Workflow(project);
+    const result = workflow.getLastCompletedPhase();
+    expect(result).toEqual({ phase: 2, response: 'Phase 2 nested array' });
+  });
+
+  test('should handle nested object format phases', () => {
+    const project = {
+      phases: {
+        1: { response: 'Phase 1 nested object' },
+        2: { response: 'Phase 2 nested object' }
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const workflow = new Workflow(project);
+    const result = workflow.getLastCompletedPhase();
+    expect(result).toEqual({ phase: 2, response: 'Phase 2 nested object' });
+  });
+});
+
+// =================================================================
+// loadDefaultPrompts Tests
+// =================================================================
+describe('loadDefaultPrompts', () => {
+  test('should load prompts without throwing', async () => {
+    await expect(loadDefaultPrompts()).resolves.not.toThrow();
+  });
+
+  test('should handle fetch errors gracefully', async () => {
+    const originalFetch = global.fetch;
+    global.fetch = jest.fn(() => Promise.reject(new Error('Network error')));
+
+    await expect(loadDefaultPrompts()).resolves.not.toThrow();
+
+    global.fetch = originalFetch;
+  });
+
+  test('should handle non-ok response', async () => {
+    const originalFetch = global.fetch;
+    global.fetch = jest.fn(() => Promise.resolve({ ok: false }));
+
+    await expect(loadDefaultPrompts()).resolves.not.toThrow();
+
+    global.fetch = originalFetch;
+  });
+});
