@@ -59,16 +59,16 @@ We will build a self-service portal that reduces support costs by $50,000 annual
       expect(result.clarity.score).toBeGreaterThan(10);
     });
 
-    test('should penalize content lacking actionable language and metrics', () => {
-      const weakProposal = `
+    test('should penalize vague language', () => {
+      const vagueProposal = `
 # Executive Summary
-This will be a solution. It will provide results in a timeframe.
-The approach will require effort with resources.
+This will be an easy to use, user-friendly, intuitive, seamless, flexible, and robust solution.
+It will provide good performance and high quality results in a reasonable timeframe.
+The scalable and efficient approach will be minimal effort with appropriate resources.
       `.repeat(3); // Make it long enough to pass minimum length
 
-      const result = validateDocument(weakProposal);
-      // Full validator checks for actionable language and metrics
-      expect(result.clarity.issues.length).toBeGreaterThan(0);
+      const result = validateDocument(vagueProposal);
+      expect(result.clarity.issues.some(i => i.includes('vague'))).toBe(true);
     });
 
     test('should reward measurable metrics', () => {
