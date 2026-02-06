@@ -1,17 +1,17 @@
 /**
  * IndexedDB Storage Module
- * Handles all client-side data persistence for Strategic Proposal Generator
+ * Handles all client-side data persistence for Acceptance Criteria Assistant
  * @module storage
  */
 
 /** @type {string} */
-const DB_NAME = 'strategic-proposal-db';
+const DB_NAME = 'acceptance-criteria-assistant-db';
 
 /** @type {number} */
 const DB_VERSION = 1;
 
 /** @type {string} */
-const STORE_NAME = 'proposals';
+const STORE_NAME = 'criteria';
 
 /**
  * Storage class for IndexedDB operations
