@@ -18,43 +18,43 @@ export { calculateSlopScore };
 // ============================================================================
 
 /**
- * Required sections for a complete document
- * Customize patterns and weights for your document type
+ * Required sections for acceptance criteria documents - must match validator-inline.js for consistent scoring
  */
 const REQUIRED_SECTIONS = [
-  { pattern: /^#+\s*(section.?1|heading.?1)/im, name: 'Section 1', weight: 2 },
-  { pattern: /^#+\s*(section.?2|heading.?2)/im, name: 'Section 2', weight: 2 },
-  { pattern: /^#+\s*(section.?3|heading.?3)/im, name: 'Section 3', weight: 2 },
-  { pattern: /^#+\s*(section.?4|heading.?4)/im, name: 'Section 4', weight: 1 },
-  { pattern: /^#+\s*(section.?5|heading.?5)/im, name: 'Section 5', weight: 1 },
+  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(executive\s+summary|overview|introduction|purpose)/im, name: 'Executive Summary', weight: 3 },
+  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(problem|challenge|opportunity|background|context)/im, name: 'Problem Statement', weight: 2 },
+  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(solution|approach|proposal|recommendation)/im, name: 'Proposed Solution', weight: 3 },
+  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(benefit|value|impact|outcome|result)/im, name: 'Benefits/Value', weight: 2 },
+  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(implementation|timeline|roadmap|plan|next\s+step)/im, name: 'Implementation Plan', weight: 2 },
+  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(risk|concern|assumption|constraint)/im, name: 'Risks/Assumptions', weight: 1 }
 ];
 
-// Dimension 1 patterns - CUSTOMIZE
-const DIMENSION_1_PATTERNS = {
-  sectionPattern: /^#+\s*(dimension.?1|section.?1)/im,
-  contentPattern: /\b(keyword1|keyword2|keyword3)\b/gi,
-  qualityPattern: /\b(quality|metric|measure)\b/gi,
+// Structure patterns - document organization
+const STRUCTURE_PATTERNS = {
+  sectionPattern: /^#+\s*(executive\s+summary|overview|introduction|purpose)/im,
+  contentPattern: /\b(summary|overview|introduction|purpose|objective|goal)\b/gi,
+  qualityPattern: /\b(quality|metric|measure|success|outcome)\b/gi,
 };
 
-// Dimension 2 patterns - CUSTOMIZE
-const DIMENSION_2_PATTERNS = {
-  sectionPattern: /^#+\s*(dimension.?2|section.?2)/im,
-  contentPattern: /\b(keyword4|keyword5|keyword6)\b/gi,
-  qualityPattern: /\b(quality|metric|measure)\b/gi,
+// Clarity patterns - precision and measurability
+const CLARITY_PATTERNS = {
+  sectionPattern: /^#+\s*(problem|challenge|solution|approach)/im,
+  contentPattern: /\b(implement|create|build|develop|establish|launch|deploy|integrate|automate|reduce|increase|improve)\b/gi,
+  qualityPattern: /(?:≤|≥|<|>|=)?\s*\d+(?:\.\d+)?\s*(ms|%|percent|\$|dollar|day|week|month|hour|user|item)/gi,
 };
 
-// Dimension 3 patterns - CUSTOMIZE
-const DIMENSION_3_PATTERNS = {
-  sectionPattern: /^#+\s*(dimension.?3|section.?3)/im,
-  contentPattern: /\b(keyword7|keyword8|keyword9)\b/gi,
-  qualityPattern: /\b(quality|metric|measure)\b/gi,
+// Business value patterns - ROI and stakeholder value
+const BUSINESS_VALUE_PATTERNS = {
+  sectionPattern: /^#+\s*(benefit|value|impact|outcome|result)/im,
+  contentPattern: /\b(roi|return|value|benefit|savings|revenue|cost|profit|efficiency|productivity)\b/gi,
+  qualityPattern: /\b(stakeholder|customer|user|business|team|organization)\b/gi,
 };
 
-// Dimension 4 patterns - CUSTOMIZE
-const DIMENSION_4_PATTERNS = {
-  sectionPattern: /^#+\s*(dimension.?4|section.?4)/im,
-  contentPattern: /\b(keyword10|keyword11|keyword12)\b/gi,
-  qualityPattern: /\b(quality|metric|measure)\b/gi,
+// Completeness patterns - thoroughness
+const COMPLETENESS_PATTERNS = {
+  sectionPattern: /^#+\s*(implementation|timeline|roadmap|plan|next\s+step|risk)/im,
+  contentPattern: /\b(timeline|milestone|phase|deadline|deliverable|risk|assumption|constraint)\b/gi,
+  qualityPattern: /\b(complete|comprehensive|thorough|full|detailed)\b/gi,
 };
 
 // ============================================================================
@@ -62,14 +62,14 @@ const DIMENSION_4_PATTERNS = {
 // ============================================================================
 
 /**
- * Detect dimension 1 content in text
+ * Detect structure content in text
  * @param {string} text - Text to analyze
  * @returns {Object} Detection results
  */
-export function detectDimension1(text) {
-  const hasSection = DIMENSION_1_PATTERNS.sectionPattern.test(text);
-  const contentMatches = text.match(DIMENSION_1_PATTERNS.contentPattern) || [];
-  const qualityMatches = text.match(DIMENSION_1_PATTERNS.qualityPattern) || [];
+export function detectStructure(text) {
+  const hasSection = STRUCTURE_PATTERNS.sectionPattern.test(text);
+  const contentMatches = text.match(STRUCTURE_PATTERNS.contentPattern) || [];
+  const qualityMatches = text.match(STRUCTURE_PATTERNS.qualityPattern) || [];
 
   return {
     hasSection,
@@ -77,22 +77,22 @@ export function detectDimension1(text) {
     contentCount: contentMatches.length,
     hasQuality: qualityMatches.length > 0,
     indicators: [
-      hasSection && 'Dedicated section found',
-      contentMatches.length > 0 && `${contentMatches.length} content matches`,
+      hasSection && 'Executive summary section found',
+      contentMatches.length > 0 && `${contentMatches.length} structure indicators`,
       qualityMatches.length > 0 && 'Quality indicators present'
     ].filter(Boolean)
   };
 }
 
 /**
- * Detect dimension 2 content in text
+ * Detect clarity content in text
  * @param {string} text - Text to analyze
  * @returns {Object} Detection results
  */
-export function detectDimension2(text) {
-  const hasSection = DIMENSION_2_PATTERNS.sectionPattern.test(text);
-  const contentMatches = text.match(DIMENSION_2_PATTERNS.contentPattern) || [];
-  const qualityMatches = text.match(DIMENSION_2_PATTERNS.qualityPattern) || [];
+export function detectClarity(text) {
+  const hasSection = CLARITY_PATTERNS.sectionPattern.test(text);
+  const contentMatches = text.match(CLARITY_PATTERNS.contentPattern) || [];
+  const qualityMatches = text.match(CLARITY_PATTERNS.qualityPattern) || [];
 
   return {
     hasSection,
@@ -100,22 +100,22 @@ export function detectDimension2(text) {
     contentCount: contentMatches.length,
     hasQuality: qualityMatches.length > 0,
     indicators: [
-      hasSection && 'Dedicated section found',
-      contentMatches.length > 0 && `${contentMatches.length} content matches`,
-      qualityMatches.length > 0 && 'Quality indicators present'
+      hasSection && 'Problem/solution section found',
+      contentMatches.length > 0 && `${contentMatches.length} action verbs`,
+      qualityMatches.length > 0 && 'Measurable metrics present'
     ].filter(Boolean)
   };
 }
 
 /**
- * Detect dimension 3 content in text
+ * Detect business value content in text
  * @param {string} text - Text to analyze
  * @returns {Object} Detection results
  */
-export function detectDimension3(text) {
-  const hasSection = DIMENSION_3_PATTERNS.sectionPattern.test(text);
-  const contentMatches = text.match(DIMENSION_3_PATTERNS.contentPattern) || [];
-  const qualityMatches = text.match(DIMENSION_3_PATTERNS.qualityPattern) || [];
+export function detectBusinessValue(text) {
+  const hasSection = BUSINESS_VALUE_PATTERNS.sectionPattern.test(text);
+  const contentMatches = text.match(BUSINESS_VALUE_PATTERNS.contentPattern) || [];
+  const qualityMatches = text.match(BUSINESS_VALUE_PATTERNS.qualityPattern) || [];
 
   return {
     hasSection,
@@ -123,22 +123,22 @@ export function detectDimension3(text) {
     contentCount: contentMatches.length,
     hasQuality: qualityMatches.length > 0,
     indicators: [
-      hasSection && 'Dedicated section found',
-      contentMatches.length > 0 && `${contentMatches.length} content matches`,
-      qualityMatches.length > 0 && 'Quality indicators present'
+      hasSection && 'Benefits/value section found',
+      contentMatches.length > 0 && `${contentMatches.length} value indicators`,
+      qualityMatches.length > 0 && 'Stakeholder focus present'
     ].filter(Boolean)
   };
 }
 
 /**
- * Detect dimension 4 content in text
+ * Detect completeness content in text
  * @param {string} text - Text to analyze
  * @returns {Object} Detection results
  */
-export function detectDimension4(text) {
-  const hasSection = DIMENSION_4_PATTERNS.sectionPattern.test(text);
-  const contentMatches = text.match(DIMENSION_4_PATTERNS.contentPattern) || [];
-  const qualityMatches = text.match(DIMENSION_4_PATTERNS.qualityPattern) || [];
+export function detectCompleteness(text) {
+  const hasSection = COMPLETENESS_PATTERNS.sectionPattern.test(text);
+  const contentMatches = text.match(COMPLETENESS_PATTERNS.contentPattern) || [];
+  const qualityMatches = text.match(COMPLETENESS_PATTERNS.qualityPattern) || [];
 
   return {
     hasSection,
@@ -146,9 +146,9 @@ export function detectDimension4(text) {
     contentCount: contentMatches.length,
     hasQuality: qualityMatches.length > 0,
     indicators: [
-      hasSection && 'Dedicated section found',
-      contentMatches.length > 0 && `${contentMatches.length} content matches`,
-      qualityMatches.length > 0 && 'Quality indicators present'
+      hasSection && 'Implementation/risk section found',
+      contentMatches.length > 0 && `${contentMatches.length} completeness indicators`,
+      qualityMatches.length > 0 && 'Thoroughness indicators present'
     ].filter(Boolean)
   };
 }
@@ -182,29 +182,29 @@ export function detectSections(text) {
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
-export function scoreDimension1(text) {
+export function scoreStructure(text) {
   const issues = [];
   const strengths = [];
   let score = 0;
   const maxScore = 25;
 
-  const detection = detectDimension1(text);
+  const detection = detectStructure(text);
 
   if (detection.hasSection && detection.hasContent) {
     score += 20;
-    strengths.push('Strong dimension 1 content with dedicated section');
+    strengths.push('Strong structure with executive summary');
   } else if (detection.hasContent) {
     score += 10;
-    issues.push('Dimension 1 content present but lacks dedicated section');
+    issues.push('Structure content present but lacks dedicated summary section');
   } else {
-    issues.push('Dimension 1 content missing or insufficient');
+    issues.push('Missing executive summary or overview section');
   }
 
   if (detection.hasQuality) {
-    score += 10;
+    score += 5;
     strengths.push('Quality indicators present');
   } else {
-    issues.push('Add quality indicators to strengthen this dimension');
+    issues.push('Add quality metrics to strengthen structure');
   }
 
   return { score: Math.min(score, maxScore), maxScore, issues, strengths };
@@ -215,29 +215,29 @@ export function scoreDimension1(text) {
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
-export function scoreDimension2(text) {
+export function scoreClarity(text) {
   const issues = [];
   const strengths = [];
   let score = 0;
   const maxScore = 30;
 
-  const detection = detectDimension2(text);
+  const detection = detectClarity(text);
 
   if (detection.hasSection && detection.hasContent) {
     score += 15;
-    strengths.push('Strong dimension 2 content with dedicated section');
+    strengths.push('Clear problem/solution with actionable language');
   } else if (detection.hasContent) {
     score += 8;
-    issues.push('Dimension 2 content present but lacks dedicated section');
+    issues.push('Action verbs present but lacks dedicated problem/solution sections');
   } else {
-    issues.push('Dimension 2 content missing or insufficient');
+    issues.push('Missing actionable language - use specific action verbs');
   }
 
   if (detection.hasQuality) {
-    score += 10;
-    strengths.push('Quality indicators present');
+    score += 15;
+    strengths.push('Measurable metrics and numbers present');
   } else {
-    issues.push('Add quality indicators to strengthen this dimension');
+    issues.push('Add specific metrics and numbers for measurability');
   }
 
   return { score: Math.min(score, maxScore), maxScore, issues, strengths };
@@ -248,29 +248,29 @@ export function scoreDimension2(text) {
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
-export function scoreDimension3(text) {
+export function scoreBusinessValue(text) {
   const issues = [];
   const strengths = [];
   let score = 0;
   const maxScore = 25;
 
-  const detection = detectDimension3(text);
+  const detection = detectBusinessValue(text);
 
   if (detection.hasSection && detection.hasContent) {
     score += 15;
-    strengths.push('Strong dimension 3 content with dedicated section');
+    strengths.push('Strong business value proposition with dedicated section');
   } else if (detection.hasContent) {
     score += 8;
-    issues.push('Dimension 3 content present but lacks dedicated section');
+    issues.push('Value indicators present but lacks dedicated benefits section');
   } else {
-    issues.push('Dimension 3 content missing or insufficient');
+    issues.push('Missing business value - add ROI, benefits, or value proposition');
   }
 
   if (detection.hasQuality) {
     score += 10;
-    strengths.push('Quality indicators present');
+    strengths.push('Stakeholder focus present');
   } else {
-    issues.push('Add quality indicators to strengthen this dimension');
+    issues.push('Add stakeholder perspective to strengthen value proposition');
   }
 
   return { score: Math.min(score, maxScore), maxScore, issues, strengths };
@@ -281,13 +281,13 @@ export function scoreDimension3(text) {
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
-export function scoreDimension4(text) {
+export function scoreCompleteness(text) {
   const issues = [];
   const strengths = [];
   let score = 0;
   const maxScore = 20;
 
-  const detection = detectDimension4(text);
+  const detection = detectCompleteness(text);
   const sections = detectSections(text);
 
   // Section completeness
@@ -307,9 +307,9 @@ export function scoreDimension4(text) {
 
   if (detection.hasQuality) {
     score += 10;
-    strengths.push('Quality indicators present');
+    strengths.push('Thorough implementation details present');
   } else {
-    issues.push('Add quality indicators to strengthen this dimension');
+    issues.push('Add implementation details and risk considerations');
   }
 
   return { score: Math.min(score, maxScore), maxScore, issues, strengths };
@@ -328,17 +328,17 @@ export function validateDocument(text) {
   if (!text || typeof text !== 'string') {
     return {
       totalScore: 0,
-      dimension1: { score: 0, maxScore: 30, issues: ['No content to validate'], strengths: [] },
-      dimension2: { score: 0, maxScore: 25, issues: ['No content to validate'], strengths: [] },
-      dimension3: { score: 0, maxScore: 25, issues: ['No content to validate'], strengths: [] },
-      dimension4: { score: 0, maxScore: 20, issues: ['No content to validate'], strengths: [] }
+      structure: { score: 0, maxScore: 25, issues: ['No content to validate'], strengths: [] },
+      clarity: { score: 0, maxScore: 30, issues: ['No content to validate'], strengths: [] },
+      businessValue: { score: 0, maxScore: 25, issues: ['No content to validate'], strengths: [] },
+      completeness: { score: 0, maxScore: 20, issues: ['No content to validate'], strengths: [] }
     };
   }
 
-  const dimension1 = scoreDimension1(text);
-  const dimension2 = scoreDimension2(text);
-  const dimension3 = scoreDimension3(text);
-  const dimension4 = scoreDimension4(text);
+  const structure = scoreStructure(text);
+  const clarity = scoreClarity(text);
+  const businessValue = scoreBusinessValue(text);
+  const completeness = scoreCompleteness(text);
 
   // AI slop detection - acceptance criteria must be precise and testable
   const slopPenalty = getSlopPenalty(text);
@@ -346,23 +346,23 @@ export function validateDocument(text) {
   const slopIssues = [];
 
   if (slopPenalty.penalty > 0) {
-    // Apply penalty to total score (max 6 points for acceptance criteria)
-    slopDeduction = Math.min(6, Math.floor(slopPenalty.penalty * 0.75));
+    // Apply penalty to total score (aligned with inline validator)
+    slopDeduction = Math.min(5, Math.floor(slopPenalty.penalty * 0.6));
     if (slopPenalty.issues.length > 0) {
       slopIssues.push(...slopPenalty.issues.slice(0, 2));
     }
   }
 
   const totalScore = Math.max(0,
-    dimension1.score + dimension2.score + dimension3.score + dimension4.score - slopDeduction
+    structure.score + clarity.score + businessValue.score + completeness.score - slopDeduction
   );
 
   return {
     totalScore,
-    dimension1,
-    dimension2,
-    dimension3,
-    dimension4,
+    structure,
+    clarity,
+    businessValue,
+    completeness,
     slopDetection: {
       ...slopPenalty,
       deduction: slopDeduction,
