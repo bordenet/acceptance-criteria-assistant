@@ -6,6 +6,11 @@
  * directly in the assistant after Phase 3 completion.
  */
 
+import { getSlopPenalty, calculateSlopScore } from './slop-detection.js';
+
+// Re-export for direct access
+export { calculateSlopScore };
+
 // Required sections detection patterns
 const REQUIRED_SECTIONS = [
   { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(executive\s+summary|overview|introduction|purpose)/im, name: 'Executive Summary', weight: 3 },
@@ -184,14 +189,33 @@ export function validateDocument(text) {
   const businessValue = scoreBusinessValue(text);
   const completeness = scoreCompleteness(text);
 
-  const totalScore = structure.score + clarity.score + businessValue.score + completeness.score;
+  // AI slop detection
+  const slopPenalty = getSlopPenalty(text);
+  let slopDeduction = 0;
+  const slopIssues = [];
+
+  if (slopPenalty.penalty > 0) {
+    slopDeduction = Math.min(5, Math.floor(slopPenalty.penalty * 0.6));
+    if (slopPenalty.issues.length > 0) {
+      slopIssues.push(...slopPenalty.issues.slice(0, 2));
+    }
+  }
+
+  const totalScore = Math.max(0,
+    structure.score + clarity.score + businessValue.score + completeness.score - slopDeduction
+  );
 
   return {
     totalScore,
     structure,
     clarity,
     businessValue,
-    completeness
+    completeness,
+    slopDetection: {
+      ...slopPenalty,
+      deduction: slopDeduction,
+      issues: slopIssues
+    }
   };
 }
 
