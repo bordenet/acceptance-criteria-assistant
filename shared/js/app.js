@@ -9,7 +9,6 @@ import { initRouter } from './router.js';
 import { loadDefaultPrompts } from './workflow.js';
 import { exportAllProjects, importProjects } from './projects.js';
 import { showToast, showLoading, hideLoading, formatBytes } from './ui.js';
-import { initMockMode } from './ai-mock.js';
 
 /**
  * Initialize the application
@@ -30,9 +29,6 @@ async function init() {
 
     setupGlobalEventListeners();
     console.log('✓ Event listeners attached');
-
-    initMockMode();
-    console.log('✓ Mock mode initialized');
 
     await updateStorageInfo();
 
