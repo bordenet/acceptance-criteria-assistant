@@ -2,7 +2,7 @@
  * Router Module Tests
  */
 
-import { initRouter, navigateTo, getCurrentRoute } from '../js/router.js';
+import { initRouter, navigateTo, getCurrentRoute } from '../../shared/js/router.js';
 
 describe('Router Module', () => {
   test('should export initRouter function', () => {

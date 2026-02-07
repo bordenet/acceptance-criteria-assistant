@@ -10,7 +10,7 @@ import {
   handleFiles,
   resetAttachmentTracking,
   getAttachmentStats
-} from '../js/attachments.js';
+} from '../../shared/js/attachments.js';
 
 // Helper to create mock File objects
 function createMockFile(name, size, type = 'text/plain') {

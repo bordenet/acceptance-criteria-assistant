@@ -2,7 +2,7 @@
  * Project View Tests
  */
 
-import { renderProjectView } from '../js/project-view.js';
+import { renderProjectView } from '../../shared/js/project-view.js';
 
 describe('ProjectView Module', () => {
   test('should export renderProjectView function', () => {

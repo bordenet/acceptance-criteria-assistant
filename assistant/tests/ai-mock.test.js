@@ -1,4 +1,4 @@
-import { isLocalhost, initMockMode, isMockEnabled, getMockResponse } from '../js/ai-mock.js';
+import { isLocalhost, initMockMode, isMockEnabled, getMockResponse } from '../../shared/js/ai-mock.js';
 
 describe('AI Mock Module', () => {
   describe('isLocalhost', () => {

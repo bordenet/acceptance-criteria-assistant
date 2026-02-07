@@ -3,7 +3,7 @@
  * Tests IndexedDB operations using fake-indexeddb
  */
 
-import storage from '../js/storage.js';
+import storage from '../../shared/js/storage.js';
 
 describe('Storage Module', () => {
     beforeAll(async () => {

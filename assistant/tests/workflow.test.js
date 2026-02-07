@@ -10,7 +10,7 @@
  */
 
 import { jest } from '@jest/globals';
-import { Workflow, WORKFLOW_CONFIG, getPhaseMetadata, exportFinalDocument, getExportFilename, getFinalMarkdown, loadDefaultPrompts } from '../js/workflow.js';
+import { Workflow, WORKFLOW_CONFIG, getPhaseMetadata, exportFinalDocument, getExportFilename, getFinalMarkdown, loadDefaultPrompts } from '../../shared/js/workflow.js';
 
 // Mock fetch for prompt template loading
 beforeAll(() => {

@@ -10,20 +10,22 @@ import {
   generatePhase3Prompt,
   getPhaseMetadata,
   preloadPromptTemplates
-} from '../js/prompts.js';
+} from '../../shared/js/prompts.js';
 
 // Mock fetch for loading prompt templates
+// Handles both shared/prompts/ (root) and ../shared/prompts/ (assistant/) paths
 // Uses AC-specific template variables
 global.fetch = jest.fn(async (url) => {
   const templates = {
-    'prompts/phase1.md': 'Phase 1: Issue {{ISSUE_TITLE}}. Task: {{WHAT_NEEDS_TO_BE_DONE}}. Context: {{RELATED_CONTEXT}}.',
-    'prompts/phase2.md': 'Phase 2: Review AC for {{ISSUE_TITLE}}. Previous output: {{PHASE1_OUTPUT}}',
-    'prompts/phase3.md': 'Phase 3: Final AC for {{ISSUE_TITLE}}. Phase 1: {{PHASE1_OUTPUT}}. Phase 2: {{PHASE2_OUTPUT}}'
+    'phase1.md': 'Phase 1: Issue {{ISSUE_TITLE}}. Task: {{WHAT_NEEDS_TO_BE_DONE}}. Context: {{RELATED_CONTEXT}}.',
+    'phase2.md': 'Phase 2: Review AC for {{ISSUE_TITLE}}. Previous output: {{PHASE1_OUTPUT}}',
+    'phase3.md': 'Phase 3: Final AC for {{ISSUE_TITLE}}. Phase 1: {{PHASE1_OUTPUT}}. Phase 2: {{PHASE2_OUTPUT}}'
   };
-
+  // Extract filename from path (handles both old and new paths)
+  const filename = url.split('/').pop();
   return {
     ok: true,
-    text: async () => templates[url] || 'Default template'
+    text: async () => templates[filename] || 'Default template'
   };
 });
 
@@ -81,9 +83,13 @@ describe('preloadPromptTemplates', () => {
   test('should preload all phase templates', async () => {
     await preloadPromptTemplates();
 
-    expect(global.fetch).toHaveBeenCalledWith('prompts/phase1.md');
-    expect(global.fetch).toHaveBeenCalledWith('prompts/phase2.md');
-    expect(global.fetch).toHaveBeenCalledWith('prompts/phase3.md');
+    // Verify fetch was called 3 times (once per phase)
+    expect(global.fetch).toHaveBeenCalledTimes(3);
+    // Verify paths end with phase filenames (works with shared/ pattern)
+    const calls = global.fetch.mock.calls.map(c => c[0]);
+    expect(calls.some(url => url.endsWith('phase1.md'))).toBe(true);
+    expect(calls.some(url => url.endsWith('phase2.md'))).toBe(true);
+    expect(calls.some(url => url.endsWith('phase3.md'))).toBe(true);
   });
 });
 
