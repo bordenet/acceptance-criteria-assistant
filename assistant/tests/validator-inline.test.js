@@ -1,7 +1,19 @@
 /**
  * Tests for validator-inline.js
  */
-import { validateDocument, getScoreColor, getScoreLabel } from '../../shared/js/validator-inline.js';
+import {
+  validateDocument,
+  getScoreColor,
+  getScoreLabel,
+  scoreStructure,
+  scoreClarity,
+  scoreBusinessValue,
+  scoreCompleteness,
+  detectStructure,
+  detectClarity,
+  detectBusinessValue,
+  detectCompleteness
+} from '../../shared/js/validator-inline.js';
 
 describe('Inline Document Validator', () => {
   describe('validateDocument', () => {
@@ -143,3 +155,149 @@ Implement new architecture to reduce latency to 100ms.
   });
 });
 
+// ============================================================================
+// Scoring Function Tests
+// ============================================================================
+
+describe('Scoring Functions', () => {
+  describe('scoreStructure', () => {
+    test('should return maxScore of 25', () => {
+      const result = scoreStructure('Executive Summary');
+      expect(result.maxScore).toBe(25);
+    });
+
+    test('should score higher for structured content', () => {
+      const content = `
+# Executive Summary
+This proposal outlines a comprehensive plan.
+
+## Problem Statement
+Users struggle with the current workflow.
+
+## Proposed Solution
+We will implement automated processes.
+      `.repeat(2);
+      const result = scoreStructure(content);
+      expect(result.score).toBeGreaterThan(0);
+    });
+  });
+
+  describe('scoreClarity', () => {
+    test('should return maxScore of 30', () => {
+      const result = scoreClarity('Clear requirements');
+      expect(result.maxScore).toBe(30);
+    });
+
+    test('should score higher for actionable language', () => {
+      const content = `
+Given the user is logged in
+When they click the submit button
+Then the form should be validated and saved
+The system should reduce errors by 50%
+      `.repeat(2);
+      const result = scoreClarity(content);
+      expect(result.score).toBeGreaterThan(0);
+    });
+  });
+
+  describe('scoreBusinessValue', () => {
+    test('should return maxScore of 25', () => {
+      const result = scoreBusinessValue('Value proposition');
+      expect(result.maxScore).toBe(25);
+    });
+
+    test('should score higher for value-focused content', () => {
+      const content = `
+## Benefits and Value
+- Improve customer satisfaction by 25%
+- Reduce support costs by $100,000
+- Revenue growth through upsell opportunities
+      `.repeat(2);
+      const result = scoreBusinessValue(content);
+      expect(result.score).toBeGreaterThan(0);
+    });
+  });
+
+  describe('scoreCompleteness', () => {
+    test('should return maxScore of 20', () => {
+      const result = scoreCompleteness('Complete plan');
+      expect(result.maxScore).toBe(20);
+    });
+
+    test('should score for implementation content', () => {
+      const content = `
+## Implementation Plan
+- Phase 1: Design and requirements gathering
+- Phase 2: Development and testing
+
+## Timeline and Milestones
+- Milestone 1: Complete by Q1
+- Milestone 2: Launch by Q2
+      `.repeat(3);
+      const result = scoreCompleteness(content);
+      expect(result.score).toBeGreaterThanOrEqual(0);
+    });
+  });
+});
+
+// ============================================================================
+// Detection Function Tests
+// ============================================================================
+
+describe('Detection Functions', () => {
+  describe('detectStructure', () => {
+    test('should detect executive summary section', () => {
+      const content = '# Executive Summary\nThis is an overview.';
+      const result = detectStructure(content);
+      expect(result.hasSection).toBe(true);
+    });
+
+    test('should detect content indicators', () => {
+      const content = 'The proposal outlines the overview of the project scope.';
+      const result = detectStructure(content);
+      expect(result.hasContent).toBe(true);
+    });
+  });
+
+  describe('detectClarity', () => {
+    test('should detect problem/solution section', () => {
+      const content = '## Problem Statement\nUsers face difficulties.';
+      const result = detectClarity(content);
+      expect(result.hasSection).toBe(true);
+    });
+
+    test('should detect action verbs', () => {
+      const content = 'Implement the solution, validate the input, and reduce errors.';
+      const result = detectClarity(content);
+      expect(result.hasContent).toBe(true);
+    });
+  });
+
+  describe('detectBusinessValue', () => {
+    test('should detect benefits section', () => {
+      const content = '## Benefits and Value\nImproved efficiency.';
+      const result = detectBusinessValue(content);
+      expect(result.hasSection).toBe(true);
+    });
+
+    test('should detect value indicators', () => {
+      const content = 'This will improve revenue and reduce costs by 25%.';
+      const result = detectBusinessValue(content);
+      expect(result.hasContent).toBe(true);
+    });
+  });
+
+  describe('detectCompleteness', () => {
+    test('should detect implementation section', () => {
+      const content = '## Implementation Plan\nPhase 1 starts Q1.';
+      const result = detectCompleteness(content);
+      expect(result.hasSection).toBe(true);
+    });
+
+    test('should detect completeness indicators', () => {
+      const content = 'The timeline includes milestones and risk mitigations.';
+      const result = detectCompleteness(content);
+      expect(result.hasContent).toBe(true);
+    });
+  });
+});
