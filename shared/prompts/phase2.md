@@ -121,6 +121,16 @@ For EACH criterion, ask:
 
 ---
 
+<output_rules>
+CRITICAL - Your output must be COPY-PASTE READY:
+- Start IMMEDIATELY with "## Review Assessment" (no preamble)
+- Include the Improved Version section with fixed AC
+- NO wrapping the output in markdown code fences
+- The Improved Version section should be ready to paste into Linear
+</output_rules>
+
+---
+
 **ACCEPTANCE CRITERIA TO REVIEW:**
 
 ---

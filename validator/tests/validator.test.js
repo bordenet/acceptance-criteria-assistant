@@ -15,7 +15,7 @@ describe('validateDocument', () => {
     const result = validateDocument('Some test content');
     expect(result).toHaveProperty('structure');
     expect(result).toHaveProperty('clarity');
-    expect(result).toHaveProperty('businessValue');
+    expect(result).toHaveProperty('testability');
     expect(result).toHaveProperty('completeness');
 
     // Each dimension should have score, maxScore, issues, strengths
@@ -23,6 +23,12 @@ describe('validateDocument', () => {
     expect(result.structure).toHaveProperty('maxScore');
     expect(result.structure).toHaveProperty('issues');
     expect(result.structure).toHaveProperty('strengths');
+
+    // Also verify dimension mappings for app.js compatibility
+    expect(result).toHaveProperty('dimension1');
+    expect(result).toHaveProperty('dimension2');
+    expect(result).toHaveProperty('dimension3');
+    expect(result).toHaveProperty('dimension4');
   });
 
   it('should return low total score for minimal content', () => {
@@ -46,7 +52,7 @@ describe('validateDocument', () => {
     const sumOfDimensions =
       result.structure.score +
       result.clarity.score +
-      result.businessValue.score +
+      result.testability.score +
       result.completeness.score;
     // Note: totalScore may be less than sum due to slop deduction
     expect(result.totalScore).toBeLessThanOrEqual(sumOfDimensions);

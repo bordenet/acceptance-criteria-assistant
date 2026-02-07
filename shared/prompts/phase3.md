@@ -78,12 +78,14 @@ Before outputting, verify:
 
 ---
 
-## Output Rules
-
-- **NO preamble** - Just output the markdown
-- **NO explanation** - The AC speaks for itself
-- **NO synthesis notes** - Clean output only
-- **Ready to paste** - User copies and pastes into Linear
+<output_rules>
+CRITICAL - Your output must be COPY-PASTE READY for Linear:
+- Start IMMEDIATELY with "## Summary" (no preamble like "Here's the final version...")
+- End after the last Out of Scope item (no sign-off like "Let me know if...")
+- NO markdown code fences (```markdown) wrapping the output
+- NO synthesis notes or explanations
+- The user will paste your output DIRECTLY into Linear
+</output_rules>
 
 ---
 

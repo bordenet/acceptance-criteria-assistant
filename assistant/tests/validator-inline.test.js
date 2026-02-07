@@ -1,5 +1,5 @@
 /**
- * Tests for validator-inline.js
+ * Tests for validator-inline.js - Linear Acceptance Criteria format
  */
 import {
   validateDocument,
@@ -7,28 +7,32 @@ import {
   getScoreLabel,
   scoreStructure,
   scoreClarity,
-  scoreBusinessValue,
+  scoreTestability,
   scoreCompleteness,
   detectStructure,
   detectClarity,
-  detectBusinessValue,
+  detectTestability,
   detectCompleteness
 } from '../../shared/js/validator-inline.js';
 
-describe('Inline Document Validator', () => {
+describe('Inline Document Validator - Linear AC Format', () => {
   describe('validateDocument', () => {
     test('should return zero scores for empty content', () => {
       const result = validateDocument('');
       expect(result.totalScore).toBe(0);
       expect(result.structure.score).toBe(0);
       expect(result.clarity.score).toBe(0);
-      expect(result.businessValue.score).toBe(0);
+      expect(result.testability.score).toBe(0);
       expect(result.completeness.score).toBe(0);
     });
 
-    test('should return zero scores for short content', () => {
+    test('should return low scores for short content', () => {
       const result = validateDocument('Too short');
-      expect(result.totalScore).toBe(0);
+      // Short content still gets testability points (25) since there's nothing vague to penalize
+      // But structure, clarity, and completeness should be low
+      expect(result.structure.score).toBeLessThan(15);
+      expect(result.clarity.score).toBeLessThan(15);
+      expect(result.completeness.score).toBeLessThan(15);
     });
 
     test('should return zero scores for null', () => {
@@ -36,71 +40,68 @@ describe('Inline Document Validator', () => {
       expect(result.totalScore).toBe(0);
     });
 
-    test('should score a well-structured proposal', () => {
-      const goodProposal = `
-# Executive Summary
-This proposal outlines a plan to implement a new customer portal.
+    test('should score a well-structured Linear AC', () => {
+      const goodAC = `
+## Summary
+Implement user authentication flow for the mobile app.
 
-## Problem Statement
-Currently, customers struggle to access their account information, leading to 500+ support calls per month.
+## Acceptance Criteria
+- [ ] Display login form with email and password fields
+- [ ] Validate email format on blur (show error within 100ms)
+- [ ] Show loading spinner during authentication (≤2s timeout)
+- [ ] Navigate to dashboard on successful login
+- [ ] Display error message for invalid credentials
 
-## Proposed Solution
-We will build a self-service portal that reduces support costs by $50,000 annually.
-
-## Benefits and Value
-- Customer satisfaction improvement by 25%
-- Reduced support tickets by 40%
-- Revenue growth through upsell opportunities
-
-## Implementation Plan
-- Q1: Design phase
-- Q2: Development
-- Q3: Testing and launch
-
-### Next Steps
-1. Assign product owner
-2. Schedule kickoff meeting
-
-## Risks and Assumptions
-- Risk: Integration complexity. Mitigation: Early prototype testing.
-- Assumption: API availability
+## Out of Scope
+- Password reset functionality
+- Social login (Google, Apple)
+- Biometric authentication
       `;
-      const result = validateDocument(goodProposal);
+      const result = validateDocument(goodAC);
       expect(result.totalScore).toBeGreaterThan(50);
-      expect(result.structure.score).toBeGreaterThan(10);
+      expect(result.structure.score).toBeGreaterThan(15);
       expect(result.clarity.score).toBeGreaterThan(10);
     });
 
-    test('should penalize vague language', () => {
-      const vagueProposal = `
-# Executive Summary
-This will be an easy to use, user-friendly, intuitive, seamless, flexible, and robust solution.
-It will provide good performance and high quality results in a reasonable timeframe.
-The scalable and efficient approach will be minimal effort with appropriate resources.
-      `.repeat(3); // Make it long enough to pass minimum length
+    test('should penalize vague language in testability', () => {
+      const vagueAC = `
+## Summary
+Build a user-friendly login page.
 
-      const result = validateDocument(vagueProposal);
-      // Full validator flags missing actionable language and metrics instead of "vague"
-      expect(result.clarity.issues.some(i =>
-        i.includes('vague') || i.includes('actionable') || i.includes('metrics')
+## Acceptance Criteria
+- [ ] Page works correctly on all devices
+- [ ] Handle login properly with appropriate feedback
+- [ ] Make it intuitive and seamless for users
+- [ ] Ensure fast performance
+- [ ] Provide good error handling
+
+## Out of Scope
+- None
+      `;
+      const result = validateDocument(vagueAC);
+      // Testability should flag vague terms
+      expect(result.testability.issues.some(i =>
+        i.includes('vague') || i.includes('works correctly') || i.includes('properly')
       )).toBe(true);
     });
 
     test('should reward measurable metrics', () => {
-      const measurableProposal = `
-# Executive Summary
-This proposal will reduce costs by 25% and save $100,000 per year.
-Response time will improve by 50ms.
-We expect 1000 new users within 30 days.
+      const measurableAC = `
+## Summary
+Optimize API response times for the search endpoint.
 
-## Problem
-Current system has 500ms latency and costs $200,000 annually.
+## Acceptance Criteria
+- [ ] Implement caching to reduce response time to ≤200ms
+- [ ] Handle up to 1000 concurrent requests
+- [ ] Return results within 500ms for 95% of queries
+- [ ] Limit maximum payload size to 5MB
+- [ ] Display error message for timeout after 10 seconds
 
-## Solution  
-Implement new architecture to reduce latency to 100ms.
+## Out of Scope
+- Full-text search implementation
       `;
-      const result = validateDocument(measurableProposal);
-      expect(result.clarity.score).toBeGreaterThan(5);
+      const result = validateDocument(measurableAC);
+      expect(result.clarity.score).toBeGreaterThan(10);
     });
   });
 
@@ -156,29 +157,31 @@ Implement new architecture to reduce latency to 100ms.
 });
 
 // ============================================================================
-// Scoring Function Tests
+// Scoring Function Tests - Linear AC Format
 // ============================================================================
 
 describe('Scoring Functions', () => {
   describe('scoreStructure', () => {
     test('should return maxScore of 25', () => {
-      const result = scoreStructure('Executive Summary');
+      const result = scoreStructure('## Summary\nTest');
       expect(result.maxScore).toBe(25);
     });
 
-    test('should score higher for structured content', () => {
+    test('should score higher for properly structured Linear AC', () => {
       const content = `
-# Executive Summary
-This proposal outlines a comprehensive plan.
+## Summary
+Implement user login.
 
-## Problem Statement
-Users struggle with the current workflow.
+## Acceptance Criteria
+- [ ] Display login form
+- [ ] Validate email format
+- [ ] Show error messages
 
-## Proposed Solution
-We will implement automated processes.
-      `.repeat(2);
+## Out of Scope
+- Password reset
+      `;
       const result = scoreStructure(content);
-      expect(result.score).toBeGreaterThan(0);
+      expect(result.score).toBeGreaterThan(15);
     });
   });
 
@@ -188,33 +191,43 @@ We will implement automated processes.
       expect(result.maxScore).toBe(30);
     });
 
-    test('should score higher for actionable language', () => {
+    test('should score higher for action verbs and metrics', () => {
       const content = `
-Given the user is logged in
-When they click the submit button
-Then the form should be validated and saved
-The system should reduce errors by 50%
-      `.repeat(2);
+- [ ] Implement form validation within 100ms
+- [ ] Display error message to user
+- [ ] Handle up to 1000 requests per second
+- [ ] Build caching layer for responses
+      `;
       const result = scoreClarity(content);
-      expect(result.score).toBeGreaterThan(0);
+      expect(result.score).toBeGreaterThan(10);
     });
   });
 
-  describe('scoreBusinessValue', () => {
+  describe('scoreTestability', () => {
     test('should return maxScore of 25', () => {
-      const result = scoreBusinessValue('Value proposition');
+      const result = scoreTestability('Specific criteria');
       expect(result.maxScore).toBe(25);
     });
 
-    test('should score higher for value-focused content', () => {
-      const content = `
-## Benefits and Value
-- Improve customer satisfaction by 25%
-- Reduce support costs by $100,000
-- Revenue growth through upsell opportunities
-      `.repeat(2);
-      const result = scoreBusinessValue(content);
-      expect(result.score).toBeGreaterThan(0);
+    test('should score lower for vague language', () => {
+      const vagueContent = `
+- [ ] System works correctly
+- [ ] Handle errors properly
+- [ ] Make it intuitive and user-friendly
+      `;
+      const result = scoreTestability(vagueContent);
+      expect(result.score).toBeLessThan(15);
+      expect(result.issues.some(i => i.includes('vague'))).toBe(true);
+    });
+
+    test('should score full for specific language', () => {
+      const specificContent = `
+- [ ] Return HTTP 200 on success
+- [ ] Display validation message in red
+- [ ] Complete request within 500ms
+      `;
+      const result = scoreTestability(specificContent);
+      expect(result.score).toBe(25);
     });
   });
 
@@ -224,80 +237,106 @@ The system should reduce errors by 50%
       expect(result.maxScore).toBe(20);
     });
 
-    test('should score for implementation content', () => {
+    test('should score for edge cases and error handling', () => {
       const content = `
-## Implementation Plan
-- Phase 1: Design and requirements gathering
-- Phase 2: Development and testing
+## Summary
+Handle file uploads.
 
-## Timeline and Milestones
-- Milestone 1: Complete by Q1
-- Milestone 2: Launch by Q2
-      `.repeat(3);
+## Acceptance Criteria
+- [ ] Display error for invalid file type
+- [ ] Handle empty file gracefully
+- [ ] Show timeout message after 30 seconds
+- [ ] Validate file size limit
+
+## Out of Scope
+- None
+      `;
       const result = scoreCompleteness(content);
-      expect(result.score).toBeGreaterThanOrEqual(0);
+      expect(result.score).toBeGreaterThan(10);
     });
   });
 });
 
 // ============================================================================
-// Detection Function Tests
+// Detection Function Tests - Linear AC Format
 // ============================================================================
 
 describe('Detection Functions', () => {
   describe('detectStructure', () => {
-    test('should detect executive summary section', () => {
-      const content = '# Executive Summary\nThis is an overview.';
+    test('should detect summary section', () => {
+      const content = '## Summary\nThis is an overview.';
       const result = detectStructure(content);
-      expect(result.hasSection).toBe(true);
+      expect(result.hasSummary).toBe(true);
     });
 
-    test('should detect content indicators', () => {
-      const content = 'The proposal outlines the overview of the project scope.';
+    test('should detect checkbox criteria', () => {
+      const content = '- [ ] First criterion\n- [x] Completed criterion';
       const result = detectStructure(content);
-      expect(result.hasContent).toBe(true);
+      expect(result.hasCheckboxes).toBe(true);
+      expect(result.checkboxCount).toBe(2);
+    });
+
+    test('should detect out of scope section', () => {
+      const content = '## Out of Scope\n- Password reset';
+      const result = detectStructure(content);
+      expect(result.hasOutOfScope).toBe(true);
     });
   });
 
   describe('detectClarity', () => {
-    test('should detect problem/solution section', () => {
-      const content = '## Problem Statement\nUsers face difficulties.';
+    test('should detect action verbs', () => {
+      const content = 'Implement the solution, validate the input, display results.';
       const result = detectClarity(content);
-      expect(result.hasSection).toBe(true);
+      expect(result.hasActionVerbs).toBe(true);
+      expect(result.actionVerbCount).toBeGreaterThan(0);
     });
 
-    test('should detect action verbs', () => {
-      const content = 'Implement the solution, validate the input, and reduce errors.';
+    test('should detect measurable metrics', () => {
+      const content = 'Complete within 200ms, handle 1000 users, limit to 5MB.';
       const result = detectClarity(content);
-      expect(result.hasContent).toBe(true);
+      expect(result.hasMetrics).toBe(true);
+      expect(result.metricsCount).toBeGreaterThan(0);
     });
   });
 
-  describe('detectBusinessValue', () => {
-    test('should detect benefits section', () => {
-      const content = '## Benefits and Value\nImproved efficiency.';
-      const result = detectBusinessValue(content);
-      expect(result.hasSection).toBe(true);
+  describe('detectTestability', () => {
+    test('should detect vague terms', () => {
+      const content = 'The system works correctly and handles properly.';
+      const result = detectTestability(content);
+      expect(result.vagueTermCount).toBeGreaterThan(0);
+      expect(result.vagueTerms).toContain('works correctly');
     });
 
-    test('should detect value indicators', () => {
-      const content = 'This will improve revenue and reduce costs by 25%.';
-      const result = detectBusinessValue(content);
-      expect(result.hasContent).toBe(true);
+    test('should detect user story anti-pattern', () => {
+      const content = 'As a user, I want to login so that I can access my account.';
+      const result = detectTestability(content);
+      expect(result.hasUserStory).toBe(true);
+    });
+
+    test('should detect Gherkin anti-pattern', () => {
+      const content = 'Given the user is on the login page, When they enter credentials, Then they should see the dashboard.';
+      const result = detectTestability(content);
+      expect(result.hasGherkin).toBe(true);
     });
   });
 
   describe('detectCompleteness', () => {
-    test('should detect implementation section', () => {
-      const content = '## Implementation Plan\nPhase 1 starts Q1.';
+    test('should detect error cases', () => {
+      const content = 'Handle invalid input error, show timeout message, deny unauthorized access.';
       const result = detectCompleteness(content);
-      expect(result.hasSection).toBe(true);
+      expect(result.hasErrorCases).toBe(true);
     });
 
-    test('should detect completeness indicators', () => {
-      const content = 'The timeline includes milestones and risk mitigations.';
+    test('should detect edge cases', () => {
+      const content = 'Handle empty state, limit maximum items, support zero results.';
       const result = detectCompleteness(content);
-      expect(result.hasContent).toBe(true);
+      expect(result.hasEdgeCases).toBe(true);
+    });
+
+    test('should count checkbox criteria', () => {
+      const content = '- [ ] First\n- [ ] Second\n- [ ] Third';
+      const result = detectCompleteness(content);
+      expect(result.criterionCount).toBe(3);
     });
   });
 });

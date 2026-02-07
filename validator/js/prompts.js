@@ -1,5 +1,6 @@
 /**
  * Prompt generation for LLM-based Acceptance Criteria scoring
+ * ALIGNED WITH validator.js JavaScript scoring logic for Linear AC format
  */
 
 /**
@@ -8,37 +9,45 @@
  * @returns {string} Complete prompt for LLM scoring
  */
 export function generateLLMScoringPrompt(documentContent) {
-  return `You are an expert evaluating an Acceptance Criteria document.
+  return `You are an expert evaluating Linear Acceptance Criteria.
 
-Score this Acceptance Criteria using the following rubric (0-100 points total):
+Score this Acceptance Criteria using the following rubric (0-100 points total).
+This rubric is EXACTLY aligned with the JavaScript validator - score consistently.
 
-## SCORING RUBRIC
+## SCORING RUBRIC (Linear AC Format)
 
 ### 1. Structure (25 points)
-- Document organization and formatting
-- Clear heading hierarchy
-- Proper use of bullets and tables
+Score based on presence of required sections:
+- **Summary section** (+10 pts): Has "## Summary" or equivalent header
+- **Checkbox criteria** (+10 pts): Uses "- [ ]" format, 3+ criteria = full points, 1-2 = 5 pts
+- **Out of Scope section** (+5 pts): Has "## Out of Scope" or equivalent header
 
 ### 2. Clarity (30 points)
-- Precision and avoidance of vague qualifiers
-- Measurability with specific metrics
-- Actionable language with clear verbs
+Score based on testable language:
+- **Action verbs** (+15 pts max): Count of verbs like implement, create, display, validate, handle, render, fetch, save, delete, navigate, authenticate
+  - 5+ verbs = 15 pts, 3-4 = 10 pts, 1-2 = 5 pts, 0 = 0 pts
+- **Measurable metrics** (+15 pts max): Numbers with units (ms, %, seconds, items, etc.)
+  - 3+ metrics = 15 pts, 1-2 = 8 pts, 0 = 0 pts
 
-### 3. Business Value (25 points)
-- ROI and cost-benefit analysis
-- Stakeholder value articulation
-- Success criteria definition
+### 3. Testability (25 points)
+Start at 25, DEDUCT for issues:
+- **Vague terms** (-5 to -15 pts): "works correctly", "handles properly", "appropriate", "intuitive", "seamless", "fast", "as expected", "user-friendly"
+  - 0 vague terms = no deduction, 1-2 = -5 pts, 3+ = -15 pts
+- **User story syntax** (-5 pts): "As a [user], I want..."
+- **Gherkin syntax** (-5 pts): Given/When/Then patterns
+- Minimum score is 0
 
 ### 4. Completeness (20 points)
-- Adequate length and depth
-- Next steps and action items
-- Risk identification and mitigation
+- **Criterion count** (+8 pts): 3-7 checkboxes = 8 pts, otherwise 4 pts
+- **Error/edge cases** (+6 pts): Mentions error, fail, invalid, empty, timeout, edge case, boundary, maximum, minimum
+  - Both error AND edge = 6 pts, one or other = 3 pts
+- **Section completeness** (+6 pts): All 3 sections present = 6 pts, 2 = 3 pts
 
 ## CALIBRATION GUIDANCE
-- Be HARSH. Most documents score 40-60. Only exceptional ones score 80+.
-- A score of 70+ means ready for stakeholder review.
-- Deduct points for vague language, missing sections, or unclear structure.
-- Reward specificity, clarity, and completeness.
+- Be HARSH. Most AC documents score 40-60. Only exceptional ones score 80+.
+- Score of 70+ means ready for development.
+- Penalize vague language heavily - acceptance criteria MUST be binary verifiable.
+- AI slop penalty: additional -1 to -5 pts for filler phrases, buzzwords, excessive hedging.
 
 ## DOCUMENT TO EVALUATE
 
@@ -53,16 +62,16 @@ Provide your evaluation in this exact format:
 **TOTAL SCORE: [X]/100**
 
 ### Structure: [X]/25
-[2-3 sentence justification]
+[2-3 sentence justification - mention Summary, checkboxes, Out of Scope]
 
 ### Clarity: [X]/30
-[2-3 sentence justification]
+[2-3 sentence justification - mention action verb count, metric count]
 
-### Business Value: [X]/25
-[2-3 sentence justification]
+### Testability: [X]/25
+[2-3 sentence justification - list any vague terms or anti-patterns found]
 
 ### Completeness: [X]/20
-[2-3 sentence justification]
+[2-3 sentence justification - mention criterion count, error/edge coverage]
 
 ### Top 3 Issues
 1. [Most critical issue]
@@ -83,20 +92,20 @@ Provide your evaluation in this exact format:
  */
 export function generateCritiquePrompt(documentContent, currentResult) {
   const issuesList = [
-    ...(currentResult.dimension1?.issues || []),
-    ...(currentResult.dimension2?.issues || []),
-    ...(currentResult.dimension3?.issues || []),
-    ...(currentResult.dimension4?.issues || [])
+    ...(currentResult.structure?.issues || []),
+    ...(currentResult.clarity?.issues || []),
+    ...(currentResult.testability?.issues || []),
+    ...(currentResult.completeness?.issues || [])
   ].slice(0, 5).map(i => `- ${i}`).join('\n');
 
-  return `You are an expert providing detailed feedback on Acceptance Criteria.
+  return `You are an expert providing detailed feedback on Linear Acceptance Criteria.
 
 ## CURRENT VALIDATION RESULTS
 Total Score: ${currentResult.totalScore}/100
-- Structure: ${currentResult.dimension1?.score || 0}/25
-- Clarity: ${currentResult.dimension2?.score || 0}/30
-- Business Value: ${currentResult.dimension3?.score || 0}/25
-- Completeness: ${currentResult.dimension4?.score || 0}/20
+- Structure: ${currentResult.structure?.score || 0}/25
+- Clarity: ${currentResult.clarity?.score || 0}/30
+- Testability: ${currentResult.testability?.score || 0}/25
+- Completeness: ${currentResult.completeness?.score || 0}/20
 
 Key issues detected:
 ${issuesList || '- None detected by automated scan'}
@@ -112,12 +121,13 @@ ${documentContent}
 Provide:
 1. **Executive Summary** (2-3 sentences on overall document quality)
 2. **Detailed Critique** by dimension:
-   - What works well
-   - What needs improvement
-   - Specific suggestions with examples
-3. **Revised Document** - A complete rewrite addressing all issues
+   - Structure: Are Summary, Acceptance Criteria, and Out of Scope sections present?
+   - Clarity: Are there action verbs and measurable metrics?
+   - Testability: Are there vague terms or anti-patterns to remove?
+   - Completeness: Are there 3-7 criteria with error/edge cases covered?
+3. **Revised Document** - A complete rewrite in Linear AC format
 
-Be specific. Show exact rewrites. Make it ready for stakeholder review.`;
+Output the revised document ready to paste into Linear - no preambles, no sign-offs.`;
 }
 
 /**
@@ -127,7 +137,7 @@ Be specific. Show exact rewrites. Make it ready for stakeholder review.`;
  * @returns {string} Complete prompt for rewrite
  */
 export function generateRewritePrompt(documentContent, currentResult) {
-  return `You are an expert rewriting Acceptance Criteria to achieve a score of 85+.
+  return `You are an expert rewriting Linear Acceptance Criteria to achieve a score of 85+.
 
 ## CURRENT SCORE: ${currentResult.totalScore}/100
 
@@ -137,16 +147,25 @@ export function generateRewritePrompt(documentContent, currentResult) {
 ${documentContent}
 \`\`\`
 
-## REWRITE REQUIREMENTS
+## REWRITE REQUIREMENTS (Linear AC Format)
 
 Create complete, polished Acceptance Criteria that:
-1. Scores 85+ across all dimensions
-2. Has all required sections clearly organized
-3. Uses clear, specific language
-4. Avoids vague qualifiers and jargon
-5. Is concise and stakeholder-focused
+1. Has three sections: ## Summary, ## Acceptance Criteria, ## Out of Scope
+2. Uses checkbox format: "- [ ] [criterion]"
+3. Has 3-7 checkbox criteria (sweet spot)
+4. Uses action verbs: implement, create, display, validate, handle, render, etc.
+5. Includes measurable metrics with units (ms, %, seconds, items)
+6. Avoids vague terms: "works correctly", "handles properly", "appropriate", "intuitive"
+7. No user story syntax ("As a...") or Gherkin (Given/When/Then)
+8. Covers error states and edge cases
 
-Output ONLY the rewritten document in markdown format. No commentary.`;
+<output_rules>
+- Output ONLY the rewritten acceptance criteria
+- NO preambles ("Here's the rewritten...")
+- NO sign-offs ("Let me know if...")
+- NO markdown code fences wrapping the output
+- Ready to paste directly into Linear
+</output_rules>`;
 }
 
 /**

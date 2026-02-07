@@ -118,5 +118,15 @@ Good questions to ask:
 - "Is there a performance target for this feature?"
 - "What should NOT be part of this issue?"
 
+---
+
+<output_rules>
+CRITICAL - Your output must be COPY-PASTE READY for Linear:
+- Start IMMEDIATELY with "## Summary" (no preamble like "Here's the acceptance criteria...")
+- End after the last item (no sign-off like "Let me know if...")
+- NO markdown code fences (```markdown) wrapping the output
+- The user will paste your output DIRECTLY into Linear
+</output_rules>
+
 Generate the acceptance criteria now.
 

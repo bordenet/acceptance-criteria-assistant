@@ -1,11 +1,11 @@
 /**
  * Acceptance Criteria Validator - Scoring Logic
  *
- * Scoring Dimensions:
- * 1. Structure (25 pts) - Document organization and formatting
- * 2. Clarity (30 pts) - Precision, measurability, actionable language
- * 3. Business Value (25 pts) - ROI, stakeholder value, success criteria
- * 4. Completeness (20 pts) - Length, next steps, risk mitigation
+ * Scoring Dimensions (aligned with Linear AC format):
+ * 1. Structure (25 pts) - Summary, AC checklist, Out of Scope sections
+ * 2. Clarity (30 pts) - Testable criteria, action verbs, measurable metrics
+ * 3. Testability (25 pts) - Binary verifiable, no vague terms, specific thresholds
+ * 4. Completeness (20 pts) - Criterion count, edge cases, error states
  */
 
 import { calculateSlopScore, getSlopPenalty } from './slop-detection.js';
@@ -14,47 +14,55 @@ import { calculateSlopScore, getSlopPenalty } from './slop-detection.js';
 export { calculateSlopScore };
 
 // ============================================================================
-// Constants - CUSTOMIZE THESE FOR YOUR DOCUMENT TYPE
+// Constants - LINEAR ACCEPTANCE CRITERIA FORMAT
 // ============================================================================
 
 /**
- * Required sections for acceptance criteria documents - must match validator-inline.js for consistent scoring
+ * Required sections for Linear acceptance criteria - simple checklist format
  */
 const REQUIRED_SECTIONS = [
-  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(executive\s+summary|overview|introduction|purpose)/im, name: 'Executive Summary', weight: 3 },
-  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(problem|challenge|opportunity|background|context)/im, name: 'Problem Statement', weight: 2 },
-  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(solution|approach|proposal|recommendation)/im, name: 'Proposed Solution', weight: 3 },
-  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(benefit|value|impact|outcome|result)/im, name: 'Benefits/Value', weight: 2 },
-  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(implementation|timeline|roadmap|plan|next\s+step)/im, name: 'Implementation Plan', weight: 2 },
-  { pattern: /^#+\s*(\d+\.?\d*\.?\s*)?(risk|concern|assumption|constraint)/im, name: 'Risks/Assumptions', weight: 1 }
+  { pattern: /^#+\s*summary/im, name: 'Summary', weight: 3 },
+  { pattern: /^#+\s*acceptance\s+criteria/im, name: 'Acceptance Criteria', weight: 4 },
+  { pattern: /^#+\s*out\s+of\s+scope/im, name: 'Out of Scope', weight: 2 }
 ];
 
-// Structure patterns - document organization
+// Structure patterns - Linear AC organization
 const STRUCTURE_PATTERNS = {
-  sectionPattern: /^#+\s*(executive\s+summary|overview|introduction|purpose)/im,
-  contentPattern: /\b(summary|overview|introduction|purpose|objective|goal)\b/gi,
-  qualityPattern: /\b(quality|metric|measure|success|outcome)\b/gi,
+  sectionPattern: /^#+\s*summary/im,
+  checkboxPattern: /^-\s*\[\s*[x ]?\s*\]/gim,
+  outOfScopePattern: /^#+\s*out\s+of\s+scope/im,
 };
 
-// Clarity patterns - precision and measurability
+// Clarity patterns - action verbs and measurable metrics
 const CLARITY_PATTERNS = {
-  sectionPattern: /^#+\s*(problem|challenge|solution|approach)/im,
-  contentPattern: /\b(implement|create|build|develop|establish|launch|deploy|integrate|automate|reduce|increase|improve)\b/gi,
-  qualityPattern: /(?:≤|≥|<|>|=)?\s*\d+(?:\.\d+)?\s*(ms|%|percent|\$|dollar|day|week|month|hour|user|item)/gi,
+  // Action verbs that indicate testable behavior
+  actionVerbs: /\b(implement|create|build|render|handle|display|show|hide|enable|disable|validate|submit|load|save|delete|update|fetch|send|receive|trigger|navigate|redirect|authenticate|authorize)\b/gi,
+  // Measurable metrics with units
+  metricsPattern: /(?:≤|≥|<|>|=|under|within|less than|more than|at least|at most)?\s*\d+(?:\.\d+)?\s*(ms|milliseconds?|seconds?|s|%|percent|kb|mb|gb|px|items?|users?|requests?|errors?|days?|hours?|minutes?)/gi,
+  // Specific thresholds
+  thresholdPattern: /\b(exactly|at least|at most|maximum|minimum|up to|no more than|no less than)\s+\d+/gi,
 };
 
-// Business value patterns - ROI and stakeholder value
-const BUSINESS_VALUE_PATTERNS = {
-  sectionPattern: /^#+\s*(benefit|value|impact|outcome|result)/im,
-  contentPattern: /\b(roi|return|value|benefit|savings|revenue|cost|profit|efficiency|productivity)\b/gi,
-  qualityPattern: /\b(stakeholder|customer|user|business|team|organization)\b/gi,
+// Testability patterns - vague terms to flag
+const TESTABILITY_PATTERNS = {
+  // Vague terms that make criteria untestable (BANNED)
+  vagueTerms: /\b(works?\s+correctly|handles?\s+properly|appropriate(ly)?|intuitive(ly)?|user[- ]friendly|seamless(ly)?|fast|slow|good|bad|nice|better|worse|adequate(ly)?|sufficient(ly)?|reasonable|reasonably|acceptable|properly|correctly|as\s+expected|as\s+needed)\b/gi,
+  // Anti-patterns: user story syntax
+  userStoryPattern: /\bas\s+a\s+\w+,?\s+i\s+want/i,
+  // Anti-patterns: Gherkin syntax
+  gherkinPattern: /\b(given|when|then)\s+/i,
+  // Compound criteria (should be split)
+  compoundPattern: /\band\b.*\band\b|\bor\b/i,
 };
 
-// Completeness patterns - thoroughness
+// Completeness patterns - edge cases and error states
 const COMPLETENESS_PATTERNS = {
-  sectionPattern: /^#+\s*(implementation|timeline|roadmap|plan|next\s+step|risk)/im,
-  contentPattern: /\b(timeline|milestone|phase|deadline|deliverable|risk|assumption|constraint)\b/gi,
-  qualityPattern: /\b(complete|comprehensive|thorough|full|detailed)\b/gi,
+  // Error/edge case indicators
+  errorCasePattern: /\b(error|fail|invalid|empty|null|undefined|missing|timeout|offline|denied|unauthorized|forbidden|not found|exception)\b/gi,
+  // Edge case indicators
+  edgeCasePattern: /\b(edge case|boundary|limit|maximum|minimum|empty state|no results|first|last|only one|zero|none)\b/gi,
+  // Permissions/auth indicators
+  permissionPattern: /\b(permission|role|admin|user|guest|authenticated|logged in|logged out)\b/gi,
 };
 
 // ============================================================================
@@ -62,93 +70,103 @@ const COMPLETENESS_PATTERNS = {
 // ============================================================================
 
 /**
- * Detect structure content in text
+ * Detect structure in Linear AC format (Summary, AC checkboxes, Out of Scope)
  * @param {string} text - Text to analyze
  * @returns {Object} Detection results
  */
 export function detectStructure(text) {
-  const hasSection = STRUCTURE_PATTERNS.sectionPattern.test(text);
-  const contentMatches = text.match(STRUCTURE_PATTERNS.contentPattern) || [];
-  const qualityMatches = text.match(STRUCTURE_PATTERNS.qualityPattern) || [];
+  const hasSummary = STRUCTURE_PATTERNS.sectionPattern.test(text);
+  const checkboxMatches = text.match(STRUCTURE_PATTERNS.checkboxPattern) || [];
+  const hasOutOfScope = STRUCTURE_PATTERNS.outOfScopePattern.test(text);
 
   return {
-    hasSection,
-    hasContent: contentMatches.length > 0,
-    contentCount: contentMatches.length,
-    hasQuality: qualityMatches.length > 0,
+    hasSummary,
+    hasCheckboxes: checkboxMatches.length > 0,
+    checkboxCount: checkboxMatches.length,
+    hasOutOfScope,
     indicators: [
-      hasSection && 'Executive summary section found',
-      contentMatches.length > 0 && `${contentMatches.length} structure indicators`,
-      qualityMatches.length > 0 && 'Quality indicators present'
+      hasSummary && 'Summary section found',
+      checkboxMatches.length > 0 && `${checkboxMatches.length} checkbox criteria`,
+      hasOutOfScope && 'Out of Scope section found'
     ].filter(Boolean)
   };
 }
 
 /**
- * Detect clarity content in text
+ * Detect clarity - action verbs and measurable metrics
  * @param {string} text - Text to analyze
  * @returns {Object} Detection results
  */
 export function detectClarity(text) {
-  const hasSection = CLARITY_PATTERNS.sectionPattern.test(text);
-  const contentMatches = text.match(CLARITY_PATTERNS.contentPattern) || [];
-  const qualityMatches = text.match(CLARITY_PATTERNS.qualityPattern) || [];
+  const actionVerbMatches = text.match(CLARITY_PATTERNS.actionVerbs) || [];
+  const metricsMatches = text.match(CLARITY_PATTERNS.metricsPattern) || [];
+  const thresholdMatches = text.match(CLARITY_PATTERNS.thresholdPattern) || [];
 
   return {
-    hasSection,
-    hasContent: contentMatches.length > 0,
-    contentCount: contentMatches.length,
-    hasQuality: qualityMatches.length > 0,
+    hasActionVerbs: actionVerbMatches.length > 0,
+    actionVerbCount: actionVerbMatches.length,
+    hasMetrics: metricsMatches.length > 0,
+    metricsCount: metricsMatches.length,
+    hasThresholds: thresholdMatches.length > 0,
     indicators: [
-      hasSection && 'Problem/solution section found',
-      contentMatches.length > 0 && `${contentMatches.length} action verbs`,
-      qualityMatches.length > 0 && 'Measurable metrics present'
+      actionVerbMatches.length > 0 && `${actionVerbMatches.length} action verbs`,
+      metricsMatches.length > 0 && `${metricsMatches.length} measurable metrics`,
+      thresholdMatches.length > 0 && 'Specific thresholds defined'
     ].filter(Boolean)
   };
 }
 
 /**
- * Detect business value content in text
+ * Detect testability issues - vague terms and anti-patterns
  * @param {string} text - Text to analyze
  * @returns {Object} Detection results
  */
-export function detectBusinessValue(text) {
-  const hasSection = BUSINESS_VALUE_PATTERNS.sectionPattern.test(text);
-  const contentMatches = text.match(BUSINESS_VALUE_PATTERNS.contentPattern) || [];
-  const qualityMatches = text.match(BUSINESS_VALUE_PATTERNS.qualityPattern) || [];
+export function detectTestability(text) {
+  const vagueMatches = text.match(TESTABILITY_PATTERNS.vagueTerms) || [];
+  const hasUserStory = TESTABILITY_PATTERNS.userStoryPattern.test(text);
+  const hasGherkin = TESTABILITY_PATTERNS.gherkinPattern.test(text);
+  const hasCompound = TESTABILITY_PATTERNS.compoundPattern.test(text);
 
   return {
-    hasSection,
-    hasContent: contentMatches.length > 0,
-    contentCount: contentMatches.length,
-    hasQuality: qualityMatches.length > 0,
+    vagueTermCount: vagueMatches.length,
+    vagueTerms: [...new Set(vagueMatches.map(m => m.toLowerCase()))],
+    hasUserStoryAntiPattern: hasUserStory,
+    hasGherkinAntiPattern: hasGherkin,
+    hasCompoundCriteria: hasCompound,
+    hasIssues: vagueMatches.length > 0 || hasUserStory || hasGherkin,
     indicators: [
-      hasSection && 'Benefits/value section found',
-      contentMatches.length > 0 && `${contentMatches.length} value indicators`,
-      qualityMatches.length > 0 && 'Stakeholder focus present'
+      vagueMatches.length > 0 && `${vagueMatches.length} vague terms found`,
+      hasUserStory && 'User story syntax detected (use checkboxes instead)',
+      hasGherkin && 'Gherkin syntax detected (use simple checkboxes)',
+      hasCompound && 'Compound criteria found (split into separate items)'
     ].filter(Boolean)
   };
 }
 
 /**
- * Detect completeness content in text
+ * Detect completeness - criterion count, error cases, edge cases
  * @param {string} text - Text to analyze
  * @returns {Object} Detection results
  */
 export function detectCompleteness(text) {
-  const hasSection = COMPLETENESS_PATTERNS.sectionPattern.test(text);
-  const contentMatches = text.match(COMPLETENESS_PATTERNS.contentPattern) || [];
-  const qualityMatches = text.match(COMPLETENESS_PATTERNS.qualityPattern) || [];
+  const checkboxMatches = text.match(STRUCTURE_PATTERNS.checkboxPattern) || [];
+  const errorCaseMatches = text.match(COMPLETENESS_PATTERNS.errorCasePattern) || [];
+  const edgeCaseMatches = text.match(COMPLETENESS_PATTERNS.edgeCasePattern) || [];
+  const permissionMatches = text.match(COMPLETENESS_PATTERNS.permissionPattern) || [];
 
   return {
-    hasSection,
-    hasContent: contentMatches.length > 0,
-    contentCount: contentMatches.length,
-    hasQuality: qualityMatches.length > 0,
+    criterionCount: checkboxMatches.length,
+    hasErrorCases: errorCaseMatches.length > 0,
+    errorCaseCount: errorCaseMatches.length,
+    hasEdgeCases: edgeCaseMatches.length > 0,
+    edgeCaseCount: edgeCaseMatches.length,
+    hasPermissions: permissionMatches.length > 0,
     indicators: [
-      hasSection && 'Implementation/risk section found',
-      contentMatches.length > 0 && `${contentMatches.length} completeness indicators`,
-      qualityMatches.length > 0 && 'Thoroughness indicators present'
+      checkboxMatches.length >= 3 && checkboxMatches.length <= 7 && 'Good criterion count (3-7)',
+      checkboxMatches.length < 3 && 'Too few criteria (add more)',
+      checkboxMatches.length > 7 && 'Too many criteria (consider splitting)',
+      errorCaseMatches.length > 0 && 'Error cases covered',
+      edgeCaseMatches.length > 0 && 'Edge cases addressed'
     ].filter(Boolean)
   };
 }
@@ -178,7 +196,7 @@ export function detectSections(text) {
 // ============================================================================
 
 /**
- * Score Structure (25 pts max)
+ * Score Structure (25 pts max) - Summary, AC checkboxes, Out of Scope
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
@@ -190,28 +208,38 @@ export function scoreStructure(text) {
 
   const detection = detectStructure(text);
 
-  if (detection.hasSection && detection.hasContent) {
-    score += 20;
-    strengths.push('Strong structure with executive summary');
-  } else if (detection.hasContent) {
+  // Summary section (10 pts)
+  if (detection.hasSummary) {
     score += 10;
-    issues.push('Structure content present but lacks dedicated summary section');
+    strengths.push('Summary section present');
   } else {
-    issues.push('Missing executive summary or overview section');
+    issues.push('Add a Summary section describing the feature/change');
   }
 
-  if (detection.hasQuality) {
+  // Checkbox criteria (10 pts)
+  if (detection.checkboxCount >= 3) {
+    score += 10;
+    strengths.push(`${detection.checkboxCount} checkbox criteria found`);
+  } else if (detection.checkboxCount > 0) {
     score += 5;
-    strengths.push('Quality indicators present');
+    issues.push('Add more checkbox criteria (recommend 3-7)');
   } else {
-    issues.push('Add quality metrics to strengthen structure');
+    issues.push('Missing checkbox criteria - use "- [ ]" format');
+  }
+
+  // Out of Scope section (5 pts)
+  if (detection.hasOutOfScope) {
+    score += 5;
+    strengths.push('Out of Scope section present');
+  } else {
+    issues.push('Add Out of Scope section to set clear boundaries');
   }
 
   return { score: Math.min(score, maxScore), maxScore, issues, strengths };
 }
 
 /**
- * Score Clarity (30 pts max)
+ * Score Clarity (30 pts max) - Action verbs and measurable metrics
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
@@ -223,61 +251,80 @@ export function scoreClarity(text) {
 
   const detection = detectClarity(text);
 
-  if (detection.hasSection && detection.hasContent) {
+  // Action verbs (15 pts max)
+  if (detection.actionVerbCount >= 5) {
     score += 15;
-    strengths.push('Clear problem/solution with actionable language');
-  } else if (detection.hasContent) {
-    score += 8;
-    issues.push('Action verbs present but lacks dedicated problem/solution sections');
+    strengths.push(`${detection.actionVerbCount} action verbs for testable behavior`);
+  } else if (detection.actionVerbCount >= 3) {
+    score += 10;
+    strengths.push(`${detection.actionVerbCount} action verbs found`);
+  } else if (detection.actionVerbCount > 0) {
+    score += 5;
+    issues.push('Add more action verbs (implement, create, display, validate, etc.)');
   } else {
-    issues.push('Missing actionable language - use specific action verbs');
+    issues.push('Missing action verbs - criteria should describe testable behavior');
   }
 
-  if (detection.hasQuality) {
+  // Measurable metrics (15 pts max)
+  if (detection.metricsCount >= 3) {
     score += 15;
-    strengths.push('Measurable metrics and numbers present');
+    strengths.push(`${detection.metricsCount} measurable metrics with units`);
+  } else if (detection.metricsCount >= 1) {
+    score += 8;
+    issues.push('Add more measurable metrics (time limits, percentages, counts)');
   } else {
-    issues.push('Add specific metrics and numbers for measurability');
+    issues.push('No measurable metrics - add specific numbers with units');
   }
 
   return { score: Math.min(score, maxScore), maxScore, issues, strengths };
 }
 
 /**
- * Score Business Value (25 pts max)
+ * Score Testability (25 pts max) - No vague terms, no anti-patterns
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
-export function scoreBusinessValue(text) {
+export function scoreTestability(text) {
   const issues = [];
   const strengths = [];
-  let score = 0;
+  let score = 25; // Start with full score, deduct for issues
   const maxScore = 25;
 
-  const detection = detectBusinessValue(text);
+  const detection = detectTestability(text);
 
-  if (detection.hasSection && detection.hasContent) {
-    score += 15;
-    strengths.push('Strong business value proposition with dedicated section');
-  } else if (detection.hasContent) {
-    score += 8;
-    issues.push('Value indicators present but lacks dedicated benefits section');
+  // Deduct for vague terms (up to -15 pts)
+  if (detection.vagueTermCount === 0) {
+    strengths.push('No vague terms - criteria are specific');
+  } else if (detection.vagueTermCount <= 2) {
+    score -= 5;
+    issues.push(`Remove vague terms: ${detection.vagueTerms.slice(0, 2).join(', ')}`);
   } else {
-    issues.push('Missing business value - add ROI, benefits, or value proposition');
+    score -= 15;
+    issues.push(`${detection.vagueTermCount} vague terms found: ${detection.vagueTerms.slice(0, 3).join(', ')}`);
   }
 
-  if (detection.hasQuality) {
-    score += 10;
-    strengths.push('Stakeholder focus present');
-  } else {
-    issues.push('Add stakeholder perspective to strengthen value proposition');
+  // Deduct for user story anti-pattern (-5 pts)
+  if (detection.hasUserStoryAntiPattern) {
+    score -= 5;
+    issues.push('Remove user story syntax - use simple checkboxes instead');
   }
 
-  return { score: Math.min(score, maxScore), maxScore, issues, strengths };
+  // Deduct for Gherkin anti-pattern (-5 pts)
+  if (detection.hasGherkinAntiPattern) {
+    score -= 5;
+    issues.push('Remove Given/When/Then syntax - use simple checkboxes');
+  }
+
+  // Positive indicator if clean
+  if (!detection.hasIssues) {
+    strengths.push('All criteria are binary verifiable');
+  }
+
+  return { score: Math.max(0, Math.min(score, maxScore)), maxScore, issues, strengths };
 }
 
 /**
- * Score Completeness (20 pts max)
+ * Score Completeness (20 pts max) - Criterion count, error/edge cases
  * @param {string} text - Document content
  * @returns {Object} Score result with issues and strengths
  */
@@ -290,26 +337,44 @@ export function scoreCompleteness(text) {
   const detection = detectCompleteness(text);
   const sections = detectSections(text);
 
-  // Section completeness
+  // Criterion count (8 pts) - ideal is 3-7
+  if (detection.criterionCount >= 3 && detection.criterionCount <= 7) {
+    score += 8;
+    strengths.push(`${detection.criterionCount} criteria (ideal range 3-7)`);
+  } else if (detection.criterionCount > 7) {
+    score += 4;
+    issues.push('Too many criteria - consider splitting into smaller stories');
+  } else if (detection.criterionCount > 0) {
+    score += 4;
+    issues.push('Add more criteria (recommend 3-7 per story)');
+  } else {
+    issues.push('No checkbox criteria found');
+  }
+
+  // Error/edge cases covered (6 pts)
+  if (detection.hasErrorCases && detection.hasEdgeCases) {
+    score += 6;
+    strengths.push('Error states and edge cases addressed');
+  } else if (detection.hasErrorCases || detection.hasEdgeCases) {
+    score += 3;
+    issues.push('Consider adding more error/edge case handling');
+  } else {
+    issues.push('Add error handling and edge case criteria');
+  }
+
+  // Section completeness (6 pts)
   const sectionScore = sections.found.reduce((sum, s) => sum + s.weight, 0);
   const maxSectionScore = REQUIRED_SECTIONS.reduce((sum, s) => sum + s.weight, 0);
   const sectionPercentage = sectionScore / maxSectionScore;
 
-  if (sectionPercentage >= 0.85) {
-    score += 10;
-    strengths.push(`${sections.found.length}/${REQUIRED_SECTIONS.length} required sections present`);
-  } else if (sectionPercentage >= 0.70) {
-    score += 5;
+  if (sectionPercentage >= 0.9) {
+    score += 6;
+    strengths.push(`${sections.found.length}/${REQUIRED_SECTIONS.length} sections present`);
+  } else if (sectionPercentage >= 0.6) {
+    score += 3;
     issues.push(`Missing sections: ${sections.missing.map(s => s.name).join(', ')}`);
   } else {
-    issues.push(`Only ${sections.found.length} of ${REQUIRED_SECTIONS.length} sections present`);
-  }
-
-  if (detection.hasQuality) {
-    score += 10;
-    strengths.push('Thorough implementation details present');
-  } else {
-    issues.push('Add implementation details and risk considerations');
+    issues.push('Add required sections: Summary, Acceptance Criteria, Out of Scope');
   }
 
   return { score: Math.min(score, maxScore), maxScore, issues, strengths };
@@ -322,22 +387,34 @@ export function scoreCompleteness(text) {
 /**
  * Validate a document and return comprehensive scoring results
  * @param {string} text - Document content
- * @returns {Object} Complete validation results
+ * @returns {Object} Complete validation results with dimension mappings for app.js
  */
 export function validateDocument(text) {
+  const emptyResult = { score: 0, maxScore: 25, issues: ['No content to validate'], strengths: [] };
+
   if (!text || typeof text !== 'string') {
+    const structure = { ...emptyResult, maxScore: 25 };
+    const clarity = { ...emptyResult, maxScore: 30 };
+    const testability = { ...emptyResult, maxScore: 25 };
+    const completeness = { ...emptyResult, maxScore: 20 };
+
     return {
       totalScore: 0,
-      structure: { score: 0, maxScore: 25, issues: ['No content to validate'], strengths: [] },
-      clarity: { score: 0, maxScore: 30, issues: ['No content to validate'], strengths: [] },
-      businessValue: { score: 0, maxScore: 25, issues: ['No content to validate'], strengths: [] },
-      completeness: { score: 0, maxScore: 20, issues: ['No content to validate'], strengths: [] }
+      structure,
+      clarity,
+      testability,
+      completeness,
+      // Dimension mappings for app.js compatibility
+      dimension1: structure,
+      dimension2: clarity,
+      dimension3: testability,
+      dimension4: completeness
     };
   }
 
   const structure = scoreStructure(text);
   const clarity = scoreClarity(text);
-  const businessValue = scoreBusinessValue(text);
+  const testability = scoreTestability(text);
   const completeness = scoreCompleteness(text);
 
   // AI slop detection - acceptance criteria must be precise and testable
@@ -354,15 +431,20 @@ export function validateDocument(text) {
   }
 
   const totalScore = Math.max(0,
-    structure.score + clarity.score + businessValue.score + completeness.score - slopDeduction
+    structure.score + clarity.score + testability.score + completeness.score - slopDeduction
   );
 
   return {
     totalScore,
     structure,
     clarity,
-    businessValue,
+    testability,
     completeness,
+    // Dimension mappings for app.js compatibility
+    dimension1: structure,
+    dimension2: clarity,
+    dimension3: testability,
+    dimension4: completeness,
     slopDetection: {
       ...slopPenalty,
       deduction: slopDeduction,
