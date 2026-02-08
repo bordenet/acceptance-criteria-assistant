@@ -37,8 +37,8 @@ const STRUCTURE_PATTERNS = {
 const CLARITY_PATTERNS = {
   // Action verbs that indicate testable behavior
   actionVerbs: /\b(implement|create|build|render|handle|display|show|hide|enable|disable|validate|submit|load|save|delete|update|fetch|send|receive|trigger|navigate|redirect|authenticate|authorize)\b/gi,
-  // Measurable metrics with units
-  metricsPattern: /(?:≤|≥|<|>|=|under|within|less than|more than|at least|at most)?\s*\d+(?:\.\d+)?\s*(ms|milliseconds?|seconds?|s|%|percent|kb|mb|gb|px|items?|users?|requests?|errors?|days?|hours?|minutes?)/gi,
+  // Measurable metrics with units - expanded to include common technical units
+  metricsPattern: /(?:≤|≥|<|>|=|under|within|less than|more than|at least|at most)?\s*\d+(?:\.\d+)?\s*(ms|milliseconds?|seconds?|s|%|percent|kb|mb|gb|tb|px|items?|users?|requests?|errors?|days?|hours?|minutes?|calls?|connections?|records?|retries?|attempts?|rows?|entries?|results?|pages?|clicks?|taps?|events?)/gi,
   // Specific thresholds
   thresholdPattern: /\b(exactly|at least|at most|maximum|minimum|up to|no more than|no less than)\s+\d+/gi,
 };
@@ -47,20 +47,27 @@ const CLARITY_PATTERNS = {
 const TESTABILITY_PATTERNS = {
   // Vague terms that make criteria untestable (BANNED)
   vagueTerms: /\b(works?\s+correctly|handles?\s+properly|appropriate(ly)?|intuitive(ly)?|user[- ]friendly|seamless(ly)?|fast|slow|good|bad|nice|better|worse|adequate(ly)?|sufficient(ly)?|reasonable|reasonably|acceptable|properly|correctly|as\s+expected|as\s+needed)\b/gi,
-  // Anti-patterns: user story syntax
-  userStoryPattern: /\bas\s+a\s+\w+,?\s+i\s+want/i,
-  // Anti-patterns: Gherkin syntax
-  gherkinPattern: /\b(given|when|then)\s+/i,
-  // Compound criteria (should be split)
-  compoundPattern: /\band\b.*\band\b|\bor\b/i,
+  // Anti-patterns: user story syntax - catches "As a/an/the [role], I want"
+  // Fixed to catch multi-word roles like "As an administrator I want" or "As the registered user, I want"
+  userStoryPattern: /\bas\s+(?:a|an|the)\s+[\w\s]+?,?\s*i\s+want/i,
+  // Anti-patterns: Gherkin syntax - catches:
+  // 1. Traditional Gherkin: lines starting with Given/When/Then
+  // 2. Checkbox Gherkin: "- [ ] Given a user..."
+  // Avoids false positives on "when the button is clicked" mid-sentence
+  gherkinPattern: /(?:^|\n)\s*(?:-\s*\[\s*[x ]?\s*\]\s*)?(given|when|then)\s+/im,
+  // Compound criteria (should be split) - catches ANY "and" or "or" per phase1.md
+  compoundPattern: /\b(and|or)\b/i,
+  // Implementation details - tech stack keywords that belong in technical design, not AC
+  implementationPattern: /\b(postgres(?:ql)?|mysql|mongodb|redis|sql|react|vue|angular|svelte|tailwind|css|scss|sass|aws|lambda|s3|ec2|gcp|azure|docker|kubernetes|k8s|api\s+endpoint|microservice|graphql|rest\s+api|webpack|vite|npm|yarn)\b/gi,
 };
 
 // Completeness patterns - edge cases and error states
 const COMPLETENESS_PATTERNS = {
   // Error/edge case indicators
   errorCasePattern: /\b(error|fail|invalid|empty|null|undefined|missing|timeout|offline|denied|unauthorized|forbidden|not found|exception)\b/gi,
-  // Edge case indicators
-  edgeCasePattern: /\b(edge case|boundary|limit|maximum|minimum|empty state|no results|first|last|only one|zero|none)\b/gi,
+  // Edge case indicators - tightened to avoid false positives on "first time", "none of"
+  // Removed standalone "first", "last", "none" - too many false positives
+  edgeCasePattern: /\b(edge\s+case|boundary\s+condition|boundary\s+value|upper\s+limit|lower\s+limit|maximum\s+value|minimum\s+value|empty\s+state|no\s+results|only\s+one|zero\s+items?|overflow|underflow|race\s+condition|concurrent|simultaneous)\b/gi,
   // Permissions/auth indicators
   permissionPattern: /\b(permission|role|admin|user|guest|authenticated|logged in|logged out)\b/gi,
 };
@@ -126,6 +133,7 @@ export function detectTestability(text) {
   const hasUserStory = TESTABILITY_PATTERNS.userStoryPattern.test(text);
   const hasGherkin = TESTABILITY_PATTERNS.gherkinPattern.test(text);
   const hasCompound = TESTABILITY_PATTERNS.compoundPattern.test(text);
+  const implementationMatches = text.match(TESTABILITY_PATTERNS.implementationPattern) || [];
 
   return {
     vagueTermCount: vagueMatches.length,
@@ -133,12 +141,15 @@ export function detectTestability(text) {
     hasUserStoryAntiPattern: hasUserStory,
     hasGherkinAntiPattern: hasGherkin,
     hasCompoundCriteria: hasCompound,
-    hasIssues: vagueMatches.length > 0 || hasUserStory || hasGherkin,
+    hasImplementationDetails: implementationMatches.length > 0,
+    implementationTerms: [...new Set(implementationMatches.map(m => m.toLowerCase()))],
+    hasIssues: vagueMatches.length > 0 || hasUserStory || hasGherkin || implementationMatches.length > 0,
     indicators: [
       vagueMatches.length > 0 && `${vagueMatches.length} vague terms found`,
       hasUserStory && 'User story syntax detected (use checkboxes instead)',
       hasGherkin && 'Gherkin syntax detected (use simple checkboxes)',
-      hasCompound && 'Compound criteria found (split into separate items)'
+      hasCompound && 'Compound criteria found (split into separate items)',
+      implementationMatches.length > 0 && `Implementation details found: ${implementationMatches.slice(0, 3).join(', ')}`
     ].filter(Boolean)
   };
 }
@@ -319,6 +330,13 @@ export function scoreTestability(text) {
   if (detection.hasCompoundCriteria) {
     score -= 3;
     issues.push('Split compound criteria (and/or) into separate items');
+  }
+
+  // Deduct for implementation details (-5 pts) - from adversarial review
+  // AC should describe WHAT, not HOW (tech stack belongs in technical design)
+  if (detection.hasImplementationDetails) {
+    score -= 5;
+    issues.push(`Remove implementation details: ${detection.implementationTerms.slice(0, 3).join(', ')}`);
   }
 
   // Positive indicator if clean
