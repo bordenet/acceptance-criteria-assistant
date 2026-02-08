@@ -315,8 +315,14 @@ export function scoreTestability(text) {
     issues.push('Remove Given/When/Then syntax - use simple checkboxes');
   }
 
+  // Deduct for compound criteria (-3 pts) - from adversarial review
+  if (detection.hasCompoundCriteria) {
+    score -= 3;
+    issues.push('Split compound criteria (and/or) into separate items');
+  }
+
   // Positive indicator if clean
-  if (!detection.hasIssues) {
+  if (!detection.hasIssues && !detection.hasCompoundCriteria) {
     strengths.push('All criteria are binary verifiable');
   }
 

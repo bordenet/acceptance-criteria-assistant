@@ -38,22 +38,15 @@ Linear's official guidance is clear:
 
 ## Output Format
 
-Generate markdown ready to paste into Linear:
+Generate markdown ready to paste into Linear. Use EXACTLY this structure:
 
-```markdown
-## Summary
-One sentence describing what this issue delivers.
+| Section | Format |
+|---------|--------|
+| ## Summary | One sentence describing what this issue delivers |
+| ## Acceptance Criteria | 3-7 checkbox items using `- [ ]` syntax |
+| ## Out of Scope | Bullet list of boundaries |
 
-## Acceptance Criteria
-- [ ] First testable criterion in plain language
-- [ ] Second criterion
-- [ ] Third criterion
-- [ ] ...
-
-## Out of Scope
-- Thing we're explicitly NOT doing
-- Another boundary
-```
+**Checkbox syntax must be exactly:** `- [ ] Criterion text` (hyphen, space, brackets, space, text)
 
 ---
 
@@ -79,21 +72,9 @@ One sentence describing what this issue delivers.
 
 ## Examples
 
-### ❌ Bad Acceptance Criteria
-```
-- [ ] The feature works correctly
-- [ ] Performance is acceptable
-- [ ] Edge cases are handled
-- [ ] As a user, I can do the thing so that I get value
-```
+**❌ Bad:** `- [ ] The feature works correctly` (vague), `- [ ] As a user, I want...` (user story)
 
-### ✓ Good Acceptance Criteria
-```
-- [ ] Clicking "Delete" shows confirmation dialog before deleting
-- [ ] Bulk delete processes up to 100 items in under 2 seconds
-- [ ] Deleted items appear in Trash for 30 days before permanent removal
-- [ ] Keyboard shortcut ⌘+Backspace triggers delete (when item focused)
-```
+**✓ Good:** `- [ ] Clicking "Delete" shows confirmation dialog before deleting` (specific, testable)
 
 ---
 
