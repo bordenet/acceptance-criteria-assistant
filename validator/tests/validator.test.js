@@ -2,7 +2,20 @@
  * @jest-environment jsdom
  */
 import { describe, it, expect } from '@jest/globals';
-import { validateDocument, getGrade, getScoreColor } from '../js/validator.js';
+import {
+  validateDocument,
+  getGrade,
+  getScoreColor,
+  detectStructure,
+  detectClarity,
+  detectTestability,
+  detectCompleteness,
+  detectSections,
+  scoreStructure,
+  scoreClarity,
+  scoreTestability,
+  scoreCompleteness
+} from '../js/validator.js';
 
 describe('validateDocument', () => {
   it('should return totalScore property', () => {
@@ -131,6 +144,241 @@ describe('getScoreColor', () => {
   it('should return red for low scores', () => {
     expect(getScoreColor(0)).toBe('text-red-400');
     expect(getScoreColor(39)).toBe('text-red-400');
+  });
+});
+
+describe('detectStructure', () => {
+  it('should detect summary section', () => {
+    const result = detectStructure('# Summary\n\nThis is a summary.');
+    expect(result.hasSummary).toBe(true);
+  });
+
+  it('should detect checkbox criteria', () => {
+    const result = detectStructure('- [ ] First criterion\n- [x] Second criterion');
+    expect(result.checkboxCount).toBe(2);
+  });
+
+  it('should detect out of scope section', () => {
+    const result = detectStructure('# Out of Scope\n\n- Not doing this');
+    expect(result.hasOutOfScope).toBe(true);
+  });
+});
+
+describe('detectClarity', () => {
+  it('should detect action verbs', () => {
+    const result = detectClarity('Implement the feature. Create a button. Display the result.');
+    expect(result.actionVerbCount).toBeGreaterThanOrEqual(3);
+  });
+
+  it('should detect measurable metrics', () => {
+    const result = detectClarity('Response time under 200ms. Load at least 100 items.');
+    expect(result.metricsCount).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe('detectTestability', () => {
+  it('should detect vague terms', () => {
+    const result = detectTestability('The system should work correctly and handle properly.');
+    expect(result.vagueTermCount).toBeGreaterThan(0);
+    expect(result.hasIssues).toBe(true);
+  });
+
+  it('should detect user story anti-pattern', () => {
+    const result = detectTestability('As a user, I want to login so that I can access my account.');
+    expect(result.hasUserStoryAntiPattern).toBe(true);
+  });
+
+  it('should detect Gherkin anti-pattern', () => {
+    const result = detectTestability('Given I am on the login page\nWhen I enter credentials\nThen I should be logged in');
+    expect(result.hasGherkinAntiPattern).toBe(true);
+  });
+
+  it('should detect compound criteria with or', () => {
+    const result = detectTestability('- [ ] User can login or register');
+    expect(result.hasCompoundCriteria).toBe(true);
+  });
+
+  it('should detect compound criteria with multiple ands', () => {
+    const result = detectTestability('- [ ] User can login and view dashboard and update profile');
+    expect(result.hasCompoundCriteria).toBe(true);
+  });
+
+  it('should return clean for good criteria', () => {
+    const result = detectTestability('- [ ] Display login button\n- [ ] Validate email format');
+    expect(result.hasIssues).toBe(false);
+  });
+});
+
+describe('detectCompleteness', () => {
+  it('should count criteria', () => {
+    const result = detectCompleteness('- [ ] First\n- [ ] Second\n- [ ] Third');
+    expect(result.criterionCount).toBe(3);
+  });
+
+  it('should detect error cases', () => {
+    const result = detectCompleteness('Handle error when network fails. Show error message.');
+    expect(result.hasErrorCases).toBe(true);
+  });
+
+  it('should detect edge cases', () => {
+    const result = detectCompleteness('Handle edge case when list is empty.');
+    expect(result.hasEdgeCases).toBe(true);
+  });
+});
+
+describe('detectSections', () => {
+  it('should find all required sections', () => {
+    const doc = '# Summary\n\nSummary text\n\n# Acceptance Criteria\n\n- [ ] Criterion\n\n# Out of Scope\n\n- Not this';
+    const result = detectSections(doc);
+    expect(result.found.length).toBe(3);
+    expect(result.missing.length).toBe(0);
+  });
+
+  it('should report missing sections', () => {
+    const result = detectSections('Just some text without sections');
+    expect(result.missing.length).toBe(3);
+  });
+});
+
+describe('scoreStructure', () => {
+  it('should give full points for complete structure', () => {
+    const doc = '# Summary\n\nSummary text\n\n- [ ] Criterion 1\n- [ ] Criterion 2\n- [ ] Criterion 3\n\n# Out of Scope\n\n- Not this';
+    const result = scoreStructure(doc);
+    expect(result.score).toBe(25);
+    expect(result.issues.length).toBe(0);
+  });
+
+  it('should deduct for missing summary', () => {
+    const doc = '- [ ] Criterion 1\n- [ ] Criterion 2\n- [ ] Criterion 3\n\n# Out of Scope\n\n- Not this';
+    const result = scoreStructure(doc);
+    expect(result.score).toBeLessThan(25);
+    expect(result.issues.some(i => i.includes('Summary'))).toBe(true);
+  });
+
+  it('should give partial points for 1-2 checkboxes', () => {
+    const doc = '# Summary\n\nText\n\n- [ ] Only one criterion';
+    const result = scoreStructure(doc);
+    expect(result.score).toBe(15); // 10 for summary + 5 for partial checkboxes
+  });
+
+  it('should deduct for missing checkboxes', () => {
+    const doc = '# Summary\n\nText without any checkboxes';
+    const result = scoreStructure(doc);
+    expect(result.issues.some(i => i.includes('checkbox'))).toBe(true);
+  });
+});
+
+describe('scoreClarity', () => {
+  it('should give full points for clear criteria', () => {
+    const doc = 'Implement login. Create button. Display result. Validate input. Handle errors. Response under 200ms. Load 100 items. Process 50 requests.';
+    const result = scoreClarity(doc);
+    expect(result.score).toBe(30);
+  });
+
+  it('should give partial points for some action verbs', () => {
+    const doc = 'Implement login. Create button. Display result.';
+    const result = scoreClarity(doc);
+    expect(result.score).toBeGreaterThanOrEqual(10);
+    expect(result.score).toBeLessThan(30);
+  });
+
+  it('should give partial points for some metrics', () => {
+    const doc = 'Response under 200ms.';
+    const result = scoreClarity(doc);
+    expect(result.score).toBeGreaterThan(0);
+  });
+
+  it('should deduct for no action verbs', () => {
+    const doc = 'The system should be good.';
+    const result = scoreClarity(doc);
+    expect(result.issues.some(i => i.includes('action verbs'))).toBe(true);
+  });
+
+  it('should deduct for no metrics', () => {
+    const doc = 'Implement login feature.';
+    const result = scoreClarity(doc);
+    expect(result.issues.some(i => i.includes('metric'))).toBe(true);
+  });
+});
+
+describe('scoreTestability', () => {
+  it('should give full points for testable criteria', () => {
+    const doc = '- [ ] Display login button\n- [ ] Validate email format';
+    const result = scoreTestability(doc);
+    expect(result.score).toBe(25);
+    expect(result.strengths.some(s => s.includes('binary verifiable'))).toBe(true);
+  });
+
+  it('should deduct for vague terms', () => {
+    const doc = 'The system should work correctly and handle properly.';
+    const result = scoreTestability(doc);
+    expect(result.score).toBeLessThan(25);
+    expect(result.issues.some(i => i.includes('vague'))).toBe(true);
+  });
+
+  it('should deduct for many vague terms', () => {
+    const doc = 'Works correctly. Handles properly. Appropriate response. Intuitive design. User-friendly interface.';
+    const result = scoreTestability(doc);
+    expect(result.score).toBeLessThanOrEqual(10);
+  });
+
+  it('should deduct for user story syntax', () => {
+    const doc = 'As a user, I want to login so that I can access my account.';
+    const result = scoreTestability(doc);
+    expect(result.score).toBeLessThan(25);
+    expect(result.issues.some(i => i.includes('user story'))).toBe(true);
+  });
+
+  it('should deduct for Gherkin syntax', () => {
+    const doc = 'Given I am on the login page\nWhen I enter credentials\nThen I should be logged in';
+    const result = scoreTestability(doc);
+    expect(result.score).toBeLessThan(25);
+    expect(result.issues.some(i => i.includes('Given/When/Then'))).toBe(true);
+  });
+
+  it('should deduct for compound criteria', () => {
+    const doc = '- [ ] User can login or register';
+    const result = scoreTestability(doc);
+    expect(result.score).toBeLessThan(25);
+    expect(result.issues.some(i => i.includes('compound'))).toBe(true);
+  });
+});
+
+describe('scoreCompleteness', () => {
+  it('should give full points for complete criteria', () => {
+    const doc = '# Summary\n\nText\n\n# Acceptance Criteria\n\n- [ ] Criterion 1\n- [ ] Criterion 2\n- [ ] Criterion 3\n- [ ] Handle error when network fails\n- [ ] Handle edge case when list is empty\n\n# Out of Scope\n\n- Not this';
+    const result = scoreCompleteness(doc);
+    expect(result.score).toBe(20);
+  });
+
+  it('should give partial points for too many criteria', () => {
+    const doc = '- [ ] C1\n- [ ] C2\n- [ ] C3\n- [ ] C4\n- [ ] C5\n- [ ] C6\n- [ ] C7\n- [ ] C8\n- [ ] C9\n- [ ] C10';
+    const result = scoreCompleteness(doc);
+    expect(result.issues.some(i => i.includes('Too many'))).toBe(true);
+  });
+
+  it('should give partial points for too few criteria', () => {
+    const doc = '- [ ] Only one criterion';
+    const result = scoreCompleteness(doc);
+    expect(result.issues.some(i => i.includes('Add more criteria'))).toBe(true);
+  });
+
+  it('should deduct for no criteria', () => {
+    const doc = 'Just text without any checkboxes';
+    const result = scoreCompleteness(doc);
+    expect(result.issues.some(i => i.includes('No checkbox'))).toBe(true);
+  });
+
+  it('should give partial points for only error cases', () => {
+    const doc = '- [ ] Handle error when network fails';
+    const result = scoreCompleteness(doc);
+    expect(result.score).toBeGreaterThan(0);
+  });
+
+  it('should give partial points for only edge cases', () => {
+    const doc = '- [ ] Handle edge case when list is empty';
+    const result = scoreCompleteness(doc);
+    expect(result.score).toBeGreaterThan(0);
   });
 });
 
