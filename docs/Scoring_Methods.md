@@ -130,6 +130,101 @@ User stories and Gherkin are valid formats—but not for acceptance criteria. AC
 | 20-39 | D | Poor - anti-patterns or untestable |
 | 0-19 | F | Not AC - rewrite from scratch |
 
+## LLM Scoring
+
+The validator uses a **dual-scoring architecture**: JavaScript pattern matching provides fast, deterministic scoring, while LLM evaluation adds semantic understanding. Both systems use aligned rubrics but may diverge on edge cases.
+
+### Three LLM Prompts
+
+| Prompt | Purpose | When Used |
+|--------|---------|-----------|
+| **Scoring Prompt** | Evaluate AC against rubric, return dimension scores | Initial validation |
+| **Critique Prompt** | Generate clarifying questions to improve weak areas | After scoring |
+| **Rewrite Prompt** | Produce improved AC targeting 85+ score | User-requested rewrite |
+
+### LLM Scoring Rubric
+
+The LLM uses the same 4-dimension rubric as JavaScript, with identical point allocations:
+
+| Dimension | Points | LLM Focus |
+|-----------|--------|-----------|
+| Structure | 25 | Linear AC format with checkboxes, summary section, out-of-scope section |
+| Clarity | 30 | Action verbs (implement, validate, display), measurable thresholds with units |
+| Testability | 25 | No vague terms ("works correctly"), no anti-patterns (user stories, Gherkin) |
+| Completeness | 20 | 3-7 criteria (goldilocks range), error cases, edge cases covered |
+
+### LLM Calibration Guidance
+
+The LLM prompt includes explicit calibration signals:
+
+**Reward signals:**
+- Specific measurable thresholds with units (e.g., "< 200ms", "≤ 5 errors")
+- Checkbox format with clear pass/fail criteria
+- Error and edge cases explicitly covered
+- Action verbs at start of each criterion
+
+**Penalty signals:**
+- Vague terms: "works correctly", "handles properly", "intuitive", "seamless"
+- User story format: "As a [role], I want..."
+- Gherkin syntax: "Given... When... Then..."
+- Compound criteria: "X and Y and Z" in single criterion
+- Implementation details: "use SQL", "call API"
+- Too many criteria (11+): scope creep signal
+
+**Calibration baseline:** "Be HARSH. Most AC documents score 40-60. Only exceptional ones score 80+."
+
+### LLM Critique Prompt
+
+The critique prompt receives the current JS validation scores and generates improvement questions:
+
+```
+Score Summary: [totalScore]/100
+- Structure: [X]/25
+- Clarity: [X]/30
+- Testability: [X]/25
+- Completeness: [X]/20
+```
+
+Output includes:
+- Top 3 issues (specific gaps)
+- 3-5 clarifying questions focused on weakest dimensions
+- Quick wins (fixes that don't require user input)
+- Focus areas: testability, measurable thresholds, edge cases
+
+### LLM Rewrite Prompt
+
+The rewrite prompt targets an 85+ score with specific requirements:
+- Linear AC format with checkboxes (NOT user stories, NOT Gherkin)
+- Summary section explaining what feature/change the AC covers
+- Out-of-scope section explicitly stating what is NOT included
+- 3-7 criteria (goldilocks range)
+- Each criterion starts with action verb
+- Measurable thresholds with units (ms, %, items)
+- Error cases covered (invalid input, timeout, unauthorized)
+- Edge cases covered (empty state, boundary values, concurrent access)
+- No vague terms or qualifiers
+- Each criterion independently testable by QA
+
+### JS vs LLM Score Divergence
+
+| Scenario | JS Score | LLM Score | Explanation |
+|----------|----------|-----------|-------------|
+| User story format with metrics | May pass patterns | Lower | LLM penalizes anti-pattern format |
+| "Fast response" with 200ms unit | May pass | Higher | LLM rewards specific threshold |
+| 15+ detailed criteria | Higher completeness | Lower | LLM catches scope creep signal |
+| Gherkin with testable steps | May pass metrics | Lower | LLM penalizes wrong format |
+
+### LLM-Specific Adversarial Notes
+
+| Gaming Attempt | Why LLM Catches It |
+|----------------|-------------------|
+| "Works correctly under all conditions" | LLM flags as untestable vague term |
+| User story to inflate length | LLM applies format anti-pattern penalty |
+| Gherkin BDD format | LLM applies format anti-pattern penalty |
+| "Fast response time" without number | LLM requires specific threshold |
+| 20+ checkbox criteria | LLM detects scope creep |
+| Compound "X and Y and Z" criteria | LLM requires atomic, independent criteria |
+
 ## Related Files
 
 - `validator/js/validator.js` - Implementation of scoring functions
