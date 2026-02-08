@@ -65,6 +65,19 @@ describe('Attachments Module', () => {
     test('should export formatFileSize function', () => {
       expect(formatFileSize).toBeInstanceOf(Function);
     });
+
+    test('should format bytes correctly', () => {
+      expect(formatFileSize(0)).toBe('0 Bytes');
+      expect(formatFileSize(1)).toBe('1 Bytes');
+      expect(formatFileSize(1024)).toBe('1 KB');
+      expect(formatFileSize(1024 * 1024)).toBe('1 MB');
+      expect(formatFileSize(1024 * 1024 * 1024)).toBe('1 GB');
+    });
+
+    test('should format fractional sizes', () => {
+      expect(formatFileSize(1536)).toBe('1.5 KB');
+      expect(formatFileSize(2560 * 1024)).toBe('2.5 MB');
+    });
   });
 
   describe('validateFile', () => {
@@ -121,6 +134,29 @@ describe('Attachments Module', () => {
       const file = createMockFile('document.pdf', 100, 'application/pdf');
       const result = validateFile(file);
       expect(result.valid).toBe(true);
+    });
+
+    test('should reject markdown file (not in allowed extensions)', () => {
+      const file = createMockFile('readme.md', 100, 'text/markdown');
+      const result = validateFile(file);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('not allowed');
+    });
+
+    test('should reject docx file (not in allowed extensions)', () => {
+      const file = createMockFile('document.docx', 100, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      const result = validateFile(file);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('not allowed');
+    });
+
+    test('should warn about unexpected MIME type but still accept if extension is valid', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const file = createMockFile('document.txt', 100, 'application/weird-type');
+      const result = validateFile(file);
+      expect(result.valid).toBe(true);
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
     });
   });
 
