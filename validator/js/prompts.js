@@ -98,7 +98,7 @@ export function generateCritiquePrompt(documentContent, currentResult) {
     ...(currentResult.completeness?.issues || [])
   ].slice(0, 5).map(i => `- ${i}`).join('\n');
 
-  return `You are an expert providing detailed feedback on Linear Acceptance Criteria.
+  return `You are an expert helping improve Linear Acceptance Criteria.
 
 ## CURRENT VALIDATION RESULTS
 Total Score: ${currentResult.totalScore}/100
@@ -118,16 +118,39 @@ ${documentContent}
 
 ## YOUR TASK
 
-Provide:
-1. **Executive Summary** (2-3 sentences on overall document quality)
-2. **Detailed Critique** by dimension:
-   - Structure: Are Summary, Acceptance Criteria, and Out of Scope sections present?
-   - Clarity: Are there action verbs and measurable metrics?
-   - Testability: Are there vague terms or anti-patterns to remove?
-   - Completeness: Are there 3-7 criteria with error/edge cases covered?
-3. **Revised Document** - A complete rewrite in Linear AC format
+Help the author improve this Acceptance Criteria by asking clarifying questions.
 
-Output the revised document ready to paste into Linear - no preambles, no sign-offs.`;
+## REQUIRED OUTPUT FORMAT
+
+**Score Summary:** ${currentResult.totalScore}/100
+
+**Top 3 Issues:**
+1. [Most critical gap - be specific]
+2. [Second most critical gap]
+3. [Third most critical gap]
+
+**Questions to Improve Your Acceptance Criteria:**
+1. **[Question about missing/weak area]**
+   _Why this matters:_ [How answering this improves the score]
+
+2. **[Question about another gap]**
+   _Why this matters:_ [Score impact]
+
+3. **[Question about testability/edge cases]**
+   _Why this matters:_ [Score impact]
+
+(Provide 3-5 questions total, focused on the weakest dimensions)
+
+**Quick Wins (fix these now):**
+- [Specific fix that doesn't require user input]
+- [Another immediate improvement]
+
+<output_rules>
+- Start directly with "**Score Summary:**" (no preamble)
+- Do NOT include a revised document
+- Only provide questions and quick wins
+- Focus questions on: testability, edge cases, measurable outcomes
+</output_rules>`;
 }
 
 /**
