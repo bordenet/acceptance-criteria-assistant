@@ -20,7 +20,7 @@ import {
   getAttachmentStats
 } from './attachments.js';
 import { getAllTemplates, getTemplate } from './document-specific-templates.js';
-import { validateDocument, getScoreColor, getScoreLabel } from './validator-inline.js';
+import { validateDocument, getScoreColor, getScoreLabel } from '../../validator/js/validator.js';
 import { showImportModal } from './import-document.js';
 
 // Re-export attachment functions for backwards compatibility

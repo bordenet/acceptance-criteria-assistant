@@ -503,3 +503,16 @@ export function getScoreColor(score, maxScore = 100) {
   if (percentage >= 40) return 'text-orange-400';
   return 'text-red-400';
 }
+
+/**
+ * Get human-readable label for score
+ * @param {number} score - Score value (0-100)
+ * @returns {string} Label for the score
+ */
+export function getScoreLabel(score) {
+  if (score >= 80) return 'Excellent';
+  if (score >= 70) return 'Ready';
+  if (score >= 50) return 'Needs Work';
+  if (score >= 30) return 'Draft';
+  return 'Incomplete';
+}

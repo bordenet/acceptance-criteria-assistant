@@ -10,7 +10,7 @@ import { escapeHtml, showToast, copyToClipboard, copyToClipboardAsync, showPromp
 import { navigateTo } from './router.js';
 import { preloadPromptTemplates } from './prompts.js';
 import { computeWordDiff, renderDiffHtml, getDiffStats } from './diff-view.js';
-import { validateDocument, getScoreColor, getScoreLabel } from './validator-inline.js';
+import { validateDocument, getScoreColor, getScoreLabel } from '../../validator/js/validator.js';
 
 /**
  * Extract title from markdown content (looks for # Title at the beginning)
