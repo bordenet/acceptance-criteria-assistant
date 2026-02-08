@@ -81,43 +81,17 @@ For EACH criterion, ask:
 
 ## Output Format
 
-```markdown
-## Review Assessment
+Structure your review with these sections:
 
-### Scores
-| Criterion | Score | Notes |
-|-----------|-------|-------|
-| Testability | X/10 | Are criteria binary testable? |
-| Specificity | X/10 | Are vague terms eliminated? |
-| Independence | X/10 | Can each be checked separately? |
-| Plain Language | X/10 | Readable by non-engineers? |
-| Appropriate Scope | X/10 | 3-7 items, not too big/small? |
+| Section | Content |
+|---------|---------|
+| ## Review Assessment | Scores table (Testability, Specificity, Independence, Plain Language, Scope - each X/10) |
+| ### Issues Found | Numbered list: "Original text" → Problem. Suggest: "Improved text" |
+| ### Missing Edge Cases | Numbered list of edge cases and failure scenarios to consider |
+| ### Anti-Patterns Detected | Checklist: User story syntax, Gherkin syntax, Too many criteria, Compound criteria |
+| ## Improved Version | The fixed acceptance criteria ready to paste |
 
-### Issues Found
-
-1. "User can sign in" → Too vague. Suggest: "User can sign in with email/password, receives error for invalid credentials"
-2. "Performance is good" → No threshold. Suggest: "Page loads in under 2 seconds on 3G"
-...
-
-### Missing Edge Cases
-
-1. What happens when [edge case]?
-2. What if [failure scenario]?
-...
-
-### Anti-Patterns Detected
-
-- [ ] User story syntax found? (As a...)
-- [ ] Gherkin syntax found? (Given/When/Then)
-- [ ] Too many criteria? (>7)
-- [ ] Compound criteria? (and/or)
-
----
-
-## Improved Version
-
-[Provide the fixed acceptance criteria]
-```
+**Example issue format:** `"User can sign in" → Too vague. Suggest: "User can sign in with email/password, receives error for invalid credentials"`
 
 ---
 

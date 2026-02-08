@@ -44,22 +44,15 @@ Before outputting, verify:
 
 ## Output Format
 
-**Produce EXACTLY this format - ready to paste into Linear:**
+**Produce EXACTLY this structure - ready to paste into Linear:**
 
-```markdown
-## Summary
-One sentence describing what this issue delivers.
+| Section | Format |
+|---------|--------|
+| ## Summary | One sentence describing what this issue delivers |
+| ## Acceptance Criteria | 3-7 checkbox items using `- [ ]` syntax |
+| ## Out of Scope | Bullet list of boundaries |
 
-## Acceptance Criteria
-- [ ] First testable criterion in plain language
-- [ ] Second criterion
-- [ ] Third criterion
-- [ ] ...
-
-## Out of Scope
-- Thing we're explicitly NOT doing
-- Another boundary
-```
+**Checkbox syntax must be exactly:** `- [ ] Criterion text` (hyphen, space, brackets, space, text)
 
 ---
 
