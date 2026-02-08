@@ -7,7 +7,13 @@
 import {
   validateDocument,
   getScoreColor,
-  getScoreLabel
+  getScoreLabel,
+  // Detection functions
+  detectStructure,
+  detectClarity,
+  detectTestability,
+  detectCompleteness,
+  detectSections
 } from '../../validator/js/validator.js';
 
 describe('Acceptance Criteria Validator Integration', () => {
@@ -69,6 +75,53 @@ Implement user login.
     test('should return Incomplete for scores < 30', () => {
       expect(getScoreLabel(0)).toBe('Incomplete');
       expect(getScoreLabel(29)).toBe('Incomplete');
+    });
+  });
+});
+
+// ============================================================================
+// Detection Functions Tests
+// ============================================================================
+
+describe('Detection Functions', () => {
+  describe('detectStructure', () => {
+    test('should detect checkboxes', () => {
+      const result = detectStructure('- [ ] User can login\n- [ ] User can logout');
+      expect(result.hasCheckboxes).toBe(true);
+      expect(result.checkboxCount).toBe(2);
+    });
+
+    test('should detect summary section', () => {
+      const result = detectStructure('## Summary\nImplement login feature.');
+      expect(result.hasSummary).toBe(true);
+    });
+  });
+
+  describe('detectClarity', () => {
+    test('should detect clear criteria', () => {
+      const result = detectClarity('User can submit form with valid email');
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('detectTestability', () => {
+    test('should detect testable criteria', () => {
+      const result = detectTestability('Given user is logged in, when they click submit, then form is saved');
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('detectCompleteness', () => {
+    test('should detect complete criteria', () => {
+      const result = detectCompleteness('## Summary\nImplement login.\n## Acceptance Criteria\n- [ ] Display form');
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('detectSections', () => {
+    test('should detect sections in content', () => {
+      const result = detectSections('## Summary\nTest\n## Acceptance Criteria\nTest');
+      expect(result).toBeDefined();
     });
   });
 });
