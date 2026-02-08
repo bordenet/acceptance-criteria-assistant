@@ -82,6 +82,12 @@ The scoring system is designed to resist common gaming strategies:
 | Adding fake metrics | Metrics must include units; raw numbers don't count |
 | Avoiding vague terms by omission | Clarity score requires positive verb/metric presence |
 | Padding with extra criteria | Criterion count is penalized outside 3-7 range |
+| Single "and" compound criteria | Regex catches ANY "and" or "or" per phase1.md |
+| User story with multi-word roles | Pattern catches "As an administrator I want" and "As the registered user" |
+| Gherkin mid-sentence ("when clicked") | Pattern only triggers on line-start Gherkin, not mid-sentence |
+| Tech stack in AC ("Use PostgreSQL") | Implementation pattern detects 30+ tech keywords (-5 pts) |
+| Fake edge cases ("first time users") | Edge case pattern requires compound phrases like "edge case", "boundary condition" |
+| Metrics without units ("500 connections") | Expanded unit list includes calls, connections, records, retries, etc. |
 
 ### Calibration Notes
 
