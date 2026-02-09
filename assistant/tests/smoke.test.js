@@ -151,6 +151,61 @@ describe('Smoke Test - App Initialization', () => {
     });
   });
 
+  /**
+   * API Contract Tests - Verify validateDocument returns structure project-view.js expects
+   *
+   * This catches the bug where validator returns different property names than project-view.js expects.
+   * Example: validator returns 'testability' but project-view.js expects 'businessValue'
+   * Result: "Cannot read properties of undefined (reading 'issues')" at runtime
+   *
+   * These tests verify the CONSUMER CONTRACT, not just that functions exist.
+   */
+  describe('API Contract - validateDocument returns structure project-view.js expects', () => {
+    let result;
+
+    beforeAll(async () => {
+      const validator = await import('../../validator/js/validator.js');
+      result = validator.validateDocument('# Acceptance Criteria\n\n- [ ] User can login\n- [ ] System validates input');
+    });
+
+    test('returns totalScore property (number)', () => {
+      expect(result.totalScore).toBeDefined();
+      expect(typeof result.totalScore).toBe('number');
+    });
+
+    test('returns structure category breakdown with issues array', () => {
+      expect(result.structure).toBeDefined();
+      expect(result.structure).toHaveProperty('score');
+      expect(result.structure).toHaveProperty('maxScore');
+      expect(result.structure).toHaveProperty('issues');
+      expect(Array.isArray(result.structure.issues)).toBe(true);
+    });
+
+    test('returns clarity category breakdown with issues array', () => {
+      expect(result.clarity).toBeDefined();
+      expect(result.clarity).toHaveProperty('score');
+      expect(result.clarity).toHaveProperty('maxScore');
+      expect(result.clarity).toHaveProperty('issues');
+      expect(Array.isArray(result.clarity.issues)).toBe(true);
+    });
+
+    test('returns businessValue category breakdown with issues array (alias for testability)', () => {
+      expect(result.businessValue).toBeDefined();
+      expect(result.businessValue).toHaveProperty('score');
+      expect(result.businessValue).toHaveProperty('maxScore');
+      expect(result.businessValue).toHaveProperty('issues');
+      expect(Array.isArray(result.businessValue.issues)).toBe(true);
+    });
+
+    test('returns completeness category breakdown with issues array', () => {
+      expect(result.completeness).toBeDefined();
+      expect(result.completeness).toHaveProperty('score');
+      expect(result.completeness).toHaveProperty('maxScore');
+      expect(result.completeness).toHaveProperty('issues');
+      expect(Array.isArray(result.completeness.issues)).toBe(true);
+    });
+  });
+
   describe('Export Consistency - diff-view.js exports match project-view.js imports', () => {
     test('diff-view.js exports computeWordDiff', async () => {
       const diffView = await import('../../shared/js/diff-view.js');

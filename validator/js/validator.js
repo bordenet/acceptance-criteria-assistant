@@ -428,6 +428,8 @@ export function validateDocument(text) {
       clarity,
       testability,
       completeness,
+      // Alias for project-view.js compatibility (expects businessValue, we have testability)
+      businessValue: testability,
       // Dimension mappings for app.js compatibility
       dimension1: structure,
       dimension2: clarity,
@@ -464,6 +466,8 @@ export function validateDocument(text) {
     clarity,
     testability,
     completeness,
+    // Alias for project-view.js compatibility (expects businessValue, we have testability)
+    businessValue: testability,
     // Dimension mappings for app.js compatibility
     dimension1: structure,
     dimension2: clarity,
