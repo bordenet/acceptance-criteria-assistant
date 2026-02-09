@@ -56,9 +56,14 @@ let promptTemplates = {};
  * @returns {Promise<void>}
  */
 export async function loadDefaultPrompts() {
+  // Determine base path - works from both /assistant/ and root
+  const basePath = window.location.pathname.includes('/assistant')
+    ? '../shared/prompts'
+    : 'shared/prompts';
+
   for (const phase of WORKFLOW_CONFIG.phases) {
     try {
-      const response = await fetch(`prompts/phase${phase.number}.md`);
+      const response = await fetch(`${basePath}/phase${phase.number}.md`);
       if (response.ok) {
         promptTemplates[phase.number] = await response.text();
       }
