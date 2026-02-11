@@ -21,16 +21,16 @@ export { calculateSlopScore };
  * Required sections for Linear acceptance criteria - simple checklist format
  */
 const REQUIRED_SECTIONS = [
-  { pattern: /^#+\s*summary/im, name: 'Summary', weight: 3 },
-  { pattern: /^#+\s*acceptance\s+criteria/im, name: 'Acceptance Criteria', weight: 4 },
-  { pattern: /^#+\s*out\s+of\s+scope/im, name: 'Out of Scope', weight: 2 }
+  { pattern: /^(#+\s*)?summary/im, name: 'Summary', weight: 3 },
+  { pattern: /^(#+\s*)?acceptance\s+criteria/im, name: 'Acceptance Criteria', weight: 4 },
+  { pattern: /^(#+\s*)?out\s+of\s+scope/im, name: 'Out of Scope', weight: 2 }
 ];
 
 // Structure patterns - Linear AC organization
 const STRUCTURE_PATTERNS = {
-  sectionPattern: /^#+\s*summary/im,
+  sectionPattern: /^(#+\s*)?summary/im,
   checkboxPattern: /^-\s*\[\s*[x ]?\s*\]/gim,
-  outOfScopePattern: /^#+\s*out\s+of\s+scope/im,
+  outOfScopePattern: /^(#+\s*)?out\s+of\s+scope/im,
 };
 
 // Clarity patterns - action verbs and measurable metrics
