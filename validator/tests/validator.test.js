@@ -240,6 +240,53 @@ describe('detectSections', () => {
   });
 });
 
+describe('detectSections - Plain Text Heading Detection', () => {
+  // Tests for ^(#+\s*)? regex pattern that allows plain text headings (Word/Google Docs imports)
+
+  test('detects Summary section without markdown prefix', () => {
+    const text = 'Summary\nThis feature allows users to do X.';
+    const result = detectSections(text);
+    expect(result.found.some((s) => s.name === 'Summary')).toBe(true);
+  });
+
+  test('detects Acceptance Criteria section without markdown prefix', () => {
+    const text = 'Acceptance Criteria\n- [ ] User can click button\n- [ ] System responds within 2s';
+    const result = detectSections(text);
+    expect(result.found.some((s) => s.name === 'Acceptance Criteria')).toBe(true);
+  });
+
+  test('detects Out of Scope section without markdown prefix', () => {
+    const text = 'Out of Scope\n- Mobile app support\n- Admin dashboard';
+    const result = detectSections(text);
+    expect(result.found.some((s) => s.name === 'Out of Scope')).toBe(true);
+  });
+
+  test('handles mixed markdown and plain text headings', () => {
+    const text = '# Summary\nBrief description.\n\nAcceptance Criteria\n- [ ] Test case';
+    const result = detectSections(text);
+    expect(result.found.some((s) => s.name === 'Summary')).toBe(true);
+    expect(result.found.some((s) => s.name === 'Acceptance Criteria')).toBe(true);
+  });
+
+  test('handles Word/Google Docs pasted content without markdown', () => {
+    const text = `Summary
+This feature enables users to schedule appointments.
+
+Acceptance Criteria
+- [ ] User can select a date
+- [ ] User can select a time slot
+- [ ] System sends confirmation email
+
+Out of Scope
+- Recurring appointments
+- Calendar integration`;
+    const result = detectSections(text);
+    expect(result.found.some((s) => s.name === 'Summary')).toBe(true);
+    expect(result.found.some((s) => s.name === 'Acceptance Criteria')).toBe(true);
+    expect(result.found.some((s) => s.name === 'Out of Scope')).toBe(true);
+  });
+});
+
 describe('scoreStructure', () => {
   it('should give full points for complete structure', () => {
     const doc = '# Summary\n\nSummary text\n\n- [ ] Criterion 1\n- [ ] Criterion 2\n- [ ] Criterion 3\n\n# Out of Scope\n\n- Not this';
