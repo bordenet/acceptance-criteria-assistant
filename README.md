@@ -1,5 +1,7 @@
 # Acceptance Criteria Assistant
 
+> ⚠️ **Deprecation Notice**: This repository is deprecated in favor of [DocForge AI](https://github.com/bordenet/docforge-ai), which consolidates all genesis-derived assistants into a single project. This repo will be archived on **March 1, 2026**.
+
 Write acceptance criteria with AI. Three phases: draft, review, refine.
 
 [![Star this repo](https://img.shields.io/github/stars/bordenet/acceptance-criteria-assistant?style=social)](https://github.com/bordenet/acceptance-criteria-assistant)
