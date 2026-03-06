@@ -1,12 +1,14 @@
 # Acceptance Criteria Assistant
 
-> ⚠️ **Deprecation Notice**: This repository is deprecated in favor of [DocForge AI](https://github.com/bordenet/docforge-ai), which consolidates all genesis-derived assistants into a single project. This repo will be archived on **March 1, 2026**.
+> 🗄️ **ARCHIVED**: This repository has been archived. All pages now **redirect to [DocForge AI](https://bordenet.github.io/docforge-ai/)**, which consolidates all genesis-derived assistants into a single unified platform.
+>
+> **New location**: https://bordenet.github.io/docforge-ai/
 
 Write acceptance criteria with AI. Three phases: draft, review, refine.
 
 [![Star this repo](https://img.shields.io/github/stars/bordenet/acceptance-criteria-assistant?style=social)](https://github.com/bordenet/acceptance-criteria-assistant)
 
-**Try it**: [Assistant](https://bordenet.github.io/acceptance-criteria-assistant/) · [Validator](https://bordenet.github.io/acceptance-criteria-assistant/validator/)
+**⚠️ Redirects to DocForge AI**: [Assistant](https://bordenet.github.io/acceptance-criteria-assistant/) · [Validator](https://bordenet.github.io/acceptance-criteria-assistant/validator/)
 
 > **What is Acceptance Criteria?** Acceptance criteria are specific, testable conditions that a feature must satisfy before being accepted. They define the boundaries of a user story, clarify requirements, and provide pass/fail checkpoints for QA. Good AC follows the "Given-When-Then" format and eliminates ambiguity.
 
